@@ -1,0 +1,6 @@
+function(add_gtest SUITE EXECUTABLE)
+	target_link_libraries(${EXECUTABLE} gtest gtest_main)
+	target_link_libraries(${EXECUTABLE} gmock gmock_main)
+	target_link_libraries(${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
+	add_test(${SUITE} ${EXECUTABLE})
+endfunction(add_gtest SUITE EXECUTABLE)
