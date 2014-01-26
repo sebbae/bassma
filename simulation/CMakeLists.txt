@@ -73,6 +73,7 @@ ENDIF()
 ########################
 INCLUDE(cmake/Cmds.cmake)
 INCLUDE(cmake/GTestCmds.cmake)
+INCLUDE(cmake/CopyCmds.cmake)
 
 include_directories(
 	${Boost_INCLUDE_DIR}
