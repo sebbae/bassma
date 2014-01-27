@@ -3,7 +3,10 @@ set(TUTORIAL_SRCS
 )
 
 add_lib(tutorial.lib "${TUTORIAL_SRCS}")
-add_exe(tutorial TutorialApplication.cpp ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${OGRE_Overlay_LIBRARIES} tutorial.lib)
+#add_exe(tutorial TutorialApplication.cpp ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${OGRE_Overlay_LIBRARIES} tutorial.lib)
+
+add_exe(irrlicht IrrlichtHelloWorld.cpp ${IRRLICHT_LIBRARIES})
+add_exe(irrlicht2 IrrlichtQuake3Map.cpp ${IRRLICHT_LIBRARIES})
 
 if(build_tests)
 	include(test/CMakeLists.txt)

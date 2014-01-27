@@ -47,6 +47,11 @@ if(NOT OIS_FOUND)
 endif()
 
 ########################
+# OGRE                 #
+########################
+find_package(Irrlicht REQUIRED)
+
+########################
 # Boost                #
 ########################
 set(Boost_USE_STATIC_LIBS ON)
@@ -81,7 +86,10 @@ include_directories(
 	${OGRE_INCLUDE_DIRS}
 	${OGRE_SAMPLES_INCLUDEPATH}
 	${OGRE_Overlay_INCLUDE_DIRS}
+	${IRRLICHT_INCLUDE_DIRS}
 )
+
+MESSAGE(STATUS "IRRLICHT_INCLUDE_DIRS = ${IRRLICHT_INCLUDE_DIRS}")
 
 ########################
 # Add files            #
