@@ -41,28 +41,48 @@ int main(int argc, char* argv[]) {
 	}
 
 	scene::ISceneNode* node = smgr->addOctreeSceneNode(map->getMesh(0));
-	node->setPosition(core::vector3df(0, 0, 0));
+	//node->setPosition(core::vector3df(0, 0, 0));
 
-	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS(nullptr,
-			100.0f, .3f, ID_IsNotPickable, nullptr, 0, true, 3.f);
-	camera->setPosition(core::vector3df(50, 50, -60));
-	camera->setTarget(core::vector3df(-70, 30, -60));
-
-	scene::ITriangleSelector* selector = smgr->createOctreeTriangleSelector(
-			map->getMesh(0), node, 128);
-	node->setTriangleSelector(selector);
-	scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
-			selector, camera, core::vector3df(30, 50, 30),
-			core::vector3df(0, -10, 0), core::vector3df(0, 30, 0));
-	selector->drop();
-	camera->addAnimator(anim);
-	anim->drop();
+	scene::ICameraSceneNode* camera = smgr->addCameraSceneNode(nullptr,
+			core::vector3df(0, 0, 10), core::vector3df(-1, 0, 0),
+			ID_IsNotPickable, true);
+	/*
+	 smgr->addCameraSceneNodeFPS(nullptr,
+	 100.0f, .3f, ID_IsNotPickable, nullptr, 0, true, 3.f);
+	 camera->setPosition(core::vector3df(0, 0, 10));
+	 camera->setTarget(core::vector3df(0, 1, 0));
+	 */
+	/*
+	 scene::ITriangleSelector* selector = smgr->createOctreeTriangleSelector(
+	 map->getMesh(0), node, 128);
+	 node->setTriangleSelector(selector);
+	 scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
+	 selector, camera, core::vector3df(10, 10, 10),
+	 core::vector3df(0, -10, 0), core::vector3df(0, 30, 0));
+	 selector->drop();
+	 camera->addAnimator(anim);
+	 anim->drop();
+	 */
 
 	device->getCursorControl()->setVisible(false);
 
 	int lastFPS = -1;
+	const f32 MOVEMENT_SPEED = 10.f;
+	u32 then = device->getTimer()->getTime();
+
 	while (device->run()) {
 		if (device->isWindowActive()) {
+			// Work out a frame delta time.
+			const u32 now = device->getTimer()->getTime();
+			const f32 frameDeltaTime = (f32) (now - then) / 1000.f; // Time in seconds
+			then = now;
+
+			core::vector3df cameraPosition = camera->getPosition();
+			core::vector3df cameraTarget = camera->getTarget();
+			cameraPosition.X -= MOVEMENT_SPEED * frameDeltaTime;
+			camera->setPosition(cameraPosition);
+			camera->setTarget(cameraPosition + core::vector3df(-1,0,0));
+
 			driver->beginScene(true, true, video::SColor(255, 200, 200, 200));
 			smgr->drawAll();
 			driver->endScene();
