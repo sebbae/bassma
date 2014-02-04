@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 	scene::ISceneManager* smgr = device->getSceneManager();
 
 	device->getFileSystem()->addFileArchive(
-			"/home/sebastian/projects/bassma/git/simulation/media/court.pk3");
+			device->getFileSystem()->getWorkingDirectory() + "/src/media/court.pk3");
 
 	scene::IAnimatedMesh* map = smgr->getMesh("court.bsp");
 
