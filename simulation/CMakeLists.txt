@@ -47,9 +47,14 @@ if(NOT OIS_FOUND)
 endif()
 
 ########################
-# OGRE                 #
+# Irrlicht             #
 ########################
 find_package(Irrlicht REQUIRED)
+
+########################
+# OpenCV               #
+########################
+find_package(OpenCV REQUIRED)
 
 ########################
 # Boost                #
@@ -63,6 +68,12 @@ IF (Boost_FOUND)
     ADD_DEFINITIONS(-DBOOST_ALL_NO_LIB)
 	set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${Boost_LIBRARIES})
 ENDIF()
+
+########################
+# OpenGL Glut          #
+########################
+find_package(OpenGL)
+find_package(GLUT)
 
 ########################
 # Testing              #
@@ -87,6 +98,8 @@ include_directories(
 	${OGRE_SAMPLES_INCLUDEPATH}
 	${OGRE_Overlay_INCLUDE_DIRS}
 	${IRRLICHT_INCLUDE_DIRS}
+	${OPENGL_INCLUDE_DIRS}
+	${GLUT_INCLUDE_DIRS}
 )
 
 MESSAGE(STATUS "IRRLICHT_INCLUDE_DIRS = ${IRRLICHT_INCLUDE_DIRS}")
