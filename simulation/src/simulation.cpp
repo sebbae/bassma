@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 	scene::ISceneManager* smgr = device->getSceneManager();
 
 	const io::path workingDir = device->getFileSystem()->getWorkingDirectory();
-	device->getFileSystem()->addFileArchive(workingDir + "/src/media/court.pk3");
+	device->getFileSystem()->addFileArchive(workingDir + "/media/court.pk3");
 
 	scene::IAnimatedMesh* map = smgr->getMesh("court.bsp");
 
@@ -50,15 +50,18 @@ int main(int argc, char* argv[]) {
 	scene::ISceneNode* node = smgr->addOctreeSceneNode(map->getMesh(0));
 	//node->setPosition(core::vector3df(0, 0, 0));
 
-	scene::ICameraSceneNode* camera = smgr->addCameraSceneNode(nullptr,
-			core::vector3df(0, 0, 10), core::vector3df(-1, 0, 0),
-			ID_IsNotPickable, true);
-	/*
-	 smgr->addCameraSceneNodeFPS(nullptr,
-	 100.0f, .3f, ID_IsNotPickable, nullptr, 0, true, 3.f);
-	 camera->setPosition(core::vector3df(0, 0, 10));
-	 camera->setTarget(core::vector3df(0, 1, 0));
-	 */
+	scene::ICameraSceneNode* camera = nullptr;
+
+	if (!true) {
+		camera = smgr->addCameraSceneNode(nullptr,
+				core::vector3df(0, 0, 10), core::vector3df(-1, 0, 0),
+				ID_IsNotPickable, true);
+	} else {
+		camera = smgr->addCameraSceneNodeFPS(nullptr, 100.0f, .3f, ID_IsNotPickable, nullptr, 0, true, 3.f);
+		camera->setPosition(core::vector3df(0, 0, 10));
+		camera->setTarget(core::vector3df(-2, 0, 0));
+	}
+
 	/*
 	 scene::ITriangleSelector* selector = smgr->createOctreeTriangleSelector(
 	 map->getMesh(0), node, 128);
@@ -70,6 +73,13 @@ int main(int argc, char* argv[]) {
 	 camera->addAnimator(anim);
 	 anim->drop();
 	 */
+
+	scene::ISceneNode* ball = smgr->addSphereSceneNode(2.0);
+	if (ball) {
+		ball->setPosition(core::vector3df(-2, 0, 0));
+		ball->setMaterialTexture(0, driver->getTexture(workingDir + "/media/tennisball.jpg"));
+		ball->setMaterialFlag(video::EMF_LIGHTING, false);
+	}
 
 	device->getCursorControl()->setVisible(false);
 
@@ -106,13 +116,13 @@ int main(int argc, char* argv[]) {
 				lastFPS = fps;
 			}
 
-			if (true) {
+			if (false) {
 				unsigned char* buffer = new unsigned char[width*height*3];
-				glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+				glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, buffer);
 				Mat tmp(height, width, CV_8UC3, buffer);
 				Mat image;
 				flip(tmp, image, 0);
-				cvtColor(image, image, CV_RGB2BGR);
+				//cvtColor(image, image, CV_RGB2BGR);
 
 				if (!image.data) {
 					printf("No image data \n");
