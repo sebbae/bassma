@@ -18,7 +18,7 @@ struct Unit {
 template<typename Unit>
 struct Value {
 	double val;
-	explicit Value(double d) : val(d) {}
+	explicit constexpr Value(double d) : val(d) {}
 };
 
 using Speed = Value<Unit<1,0,-1>>;
@@ -26,14 +26,14 @@ using Acceleration = Value<Unit<1,0,-2>>;
 
 struct Angle {
 	double val;
-	explicit Angle(double d) : val(d) {}
+	explicit constexpr Angle(double d) : val(d) {}
 };
 
-constexpr Value<Speed> operator"" _ms(double d) {
-	return Value<Speed>(d);
+constexpr Speed operator"" _ms(long double d) {
+	return Speed(d);
 }
 
-constexpr Angle operator"" _deg(double d) {
+constexpr Angle operator"" _deg(long double d) {
 	return Angle(d);
 }
 

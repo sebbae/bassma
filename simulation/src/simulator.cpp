@@ -6,7 +6,7 @@
  */
 
 #include "VideoSource.h"
-#include "IrrlichtVideoSource.h"
+#include "IrrlichtSimulator.h"
 
 #include <opencv2/opencv.hpp>
 #include <memory>

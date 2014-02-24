@@ -5,7 +5,7 @@
  *      Author: sebastian
  */
 
-#include "IrrlichtSimulator.h".h"
+#include "IrrlichtSimulator.h"
 
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
@@ -20,6 +20,9 @@
 namespace bassma {
 
 namespace {
+
+using namespace irr;
+
 enum {
 	// I use this ISceneNode ID to indicate a scene node that is
 	// not pickable by getSceneNodeAndCollisionPointFromRay()
@@ -34,6 +37,23 @@ enum {
 	// homonids can be highlighted, but the level mesh can't.
 	IDFlag_IsHighlightable = 1 << 1
 };
+
+const irr::f32 operator*(const Speed& lhs, const irr::f32& rhs) {
+	return lhs.val * rhs;
+}
+
+const irr::f32 operator*(const irr::f32& lhs, const Speed& rhs) {
+	return lhs * rhs.val;
+}
+
+void update(scene::ICameraSceneNode* camera, const f32 frameDeltaTime, const Speed speed) {
+	core::vector3df cameraPosition = camera->getPosition();
+	core::vector3df cameraTarget = camera->getTarget();
+	cameraPosition.X -= speed * frameDeltaTime;
+	camera->setPosition(cameraPosition);
+	camera->setTarget(cameraPosition + cameraTarget);
+}
+
 }
 
 class IrrlichtRunner {
@@ -44,15 +64,18 @@ public:
 	void run();
 	void terminate();
 	cv::Mat captureFrame();
+	Speed getSpeed();
+	void setSpeed(Speed speed);
+	void turn(Angle angle);
 private:
 	static const int width = 640;
 	static const int height = 480;
+	Speed speed;
 	std::atomic<bool> stop;
 	std::mutex mutex;
 };
 
-IrrlichtRunner::IrrlichtRunner() :
-		stop(false) {
+IrrlichtRunner::IrrlichtRunner() : speed(20.0_ms), stop(false) {
 }
 
 IrrlichtRunner::~IrrlichtRunner() {
@@ -61,6 +84,17 @@ IrrlichtRunner::~IrrlichtRunner() {
 
 void IrrlichtRunner::terminate() {
 	stop.store(true);
+}
+
+Speed IrrlichtRunner::getSpeed() {
+	return speed;
+}
+
+void IrrlichtRunner::setSpeed(Speed s) {
+	speed = s;
+}
+
+void IrrlichtRunner::turn(Angle angle) {
 }
 
 cv::Mat IrrlichtRunner::captureFrame() {
@@ -111,7 +145,6 @@ void IrrlichtRunner::run() {
 	device->getCursorControl()->setVisible(false);
 
 	int lastFPS = -1;
-	const f32 MOVEMENT_SPEED = 10.f;
 	u32 then = device->getTimer()->getTime();
 
 	while (device->run()) {
@@ -121,6 +154,8 @@ void IrrlichtRunner::run() {
 			const u32 now = device->getTimer()->getTime();
 			const f32 frameDeltaTime = (f32) (now - then) / 1000.f; // Time in seconds
 			then = now;
+
+			update(camera, frameDeltaTime, speed);
 
 			driver->beginScene(true, true, video::SColor(255, 200, 200, 200));
 			smgr->drawAll();
@@ -157,6 +192,18 @@ IrrlichtSimulator::~IrrlichtSimulator() {
 
 cv::Mat IrrlichtSimulator::captureFrame() {
 	return runner->captureFrame();
+}
+
+Speed IrrlichtSimulator::getSpeed() {
+	return runner->getSpeed();
+}
+
+void IrrlichtSimulator::setSpeed(Speed speed) {
+	runner->setSpeed(speed);
+}
+
+void IrrlichtSimulator::turn(Angle angle) {
+	runner->turn(angle);
 }
 
 } /* namespace bassma */

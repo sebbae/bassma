@@ -15,7 +15,7 @@ namespace bassma {
 class CruiseControl {
 public:
 	CruiseControl() {};
-	virtual ~CruiseControl() = 0;
+	virtual ~CruiseControl() {};
 
 	CruiseControl(const CruiseControl& ctrl) = delete;
 	CruiseControl& operator=(const CruiseControl& ctrl) = delete;

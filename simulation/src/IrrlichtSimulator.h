@@ -9,6 +9,7 @@
 #define IRRLICHTVIDEOSOURCE_H_
 
 #include "VideoSource.h"
+#include "CruiseControl.h"
 
 #include <irrlicht.h>
 #include <memory>
@@ -17,12 +18,16 @@ namespace bassma {
 
 class IrrlichtRunner;
 
-class IrrlichtSimulator: public bassma::VideoSource {
+class IrrlichtSimulator: public VideoSource, public CruiseControl {
 public:
 	IrrlichtSimulator();
 	virtual ~IrrlichtSimulator();
 
 	virtual cv::Mat captureFrame();
+
+	virtual Speed getSpeed();
+	virtual void setSpeed(Speed speed);
+	virtual void turn(Angle angle);
 private:
 	std::shared_ptr<IrrlichtRunner> runner;
 };
