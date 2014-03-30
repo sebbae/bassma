@@ -6,13 +6,13 @@
  */
 
 #include <QApplication>
-#include <QTextEdit>
+#include "cqtopencvviewergl.h"
 
 int main(int argv, char **args) {
 	QApplication app(argv, args);
 
-	QTextEdit textEdit;
-	textEdit.show();
+	CQtOpenCVViewerGl viewer;
+	viewer.show();
 
 	return app.exec();
 }

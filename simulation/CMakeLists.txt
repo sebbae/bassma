@@ -59,6 +59,8 @@ find_package(OpenCV REQUIRED)
 ########################
 # Qt                   #
 ########################
+SET(QT_USE_QTOPENGL TRUE)
+
 find_package(Qt4 REQUIRED)
 # defined by FIND_PACKAGE( Qt4 ) containing path to CMAKE
 include(${QT_USE_FILE})
