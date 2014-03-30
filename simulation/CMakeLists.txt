@@ -57,6 +57,13 @@ find_package(Irrlicht REQUIRED)
 find_package(OpenCV REQUIRED)
 
 ########################
+# Qt                   #
+########################
+find_package(Qt4 REQUIRED)
+# defined by FIND_PACKAGE( Qt4 ) containing path to CMAKE
+include(${QT_USE_FILE})
+
+########################
 # Boost                #
 ########################
 set(Boost_USE_STATIC_LIBS ON)
@@ -91,6 +98,8 @@ INCLUDE(cmake/Cmds.cmake)
 INCLUDE(cmake/GTestCmds.cmake)
 INCLUDE(cmake/CopyCmds.cmake)
 
+# include CMAKE_BINARY_DIR for output of Qt's uic
+
 include_directories(
 	${Boost_INCLUDE_DIR}
 	${OIS_INCLUDE_DIRS}
@@ -100,6 +109,7 @@ include_directories(
 	${IRRLICHT_INCLUDE_DIRS}
 	${OPENGL_INCLUDE_DIRS}
 	${GLUT_INCLUDE_DIRS}
+	${CMAKE_BINARY_DIR}
 )
 
 MESSAGE(STATUS "IRRLICHT_INCLUDE_DIRS = ${IRRLICHT_INCLUDE_DIRS}")

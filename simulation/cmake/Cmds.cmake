@@ -1,5 +1,5 @@
 function(add_lib NAME SRCS)
-	# message("add_lib NAME=" ${NAME} " SRCS=" ${SRCS} " LIBS=" ${ARGN})
+	message("add_lib NAME=" ${NAME} " SRCS=" ${SRCS} " LIBS=" ${ARGN})
 
 	# expand source files w.r.t. currently processed CMakeLists.txt
 	# and expand object libs to cmakes' strange syntax
@@ -34,7 +34,7 @@ function(add_lib NAME SRCS)
 endfunction(add_lib NAME SRCS)
 
 function(add_exe NAME SRCS)
-	# message("add_exe NAME=" ${NAME} " SRCS=" ${SRCS} " LIBS=" ${ARGN})
+	message("add_exe NAME=" ${NAME} " SRCS=" ${SRCS} " LIBS=" ${ARGN})
 
 	# expand source files w.r.t. currently processed CMakeLists.txt
 	# and expand object libs to cmakes' strange syntax
@@ -55,6 +55,8 @@ function(expand_srcs LIST SRCS)
 	foreach(SRC ${SRCS})
 		if("${SRC}" MATCHES ".*\\.olib")
 			SET(SRC_LIST ${SRC_LIST} $<TARGET_OBJECTS:${SRC}>)
+		elseif(IS_ABSOLUTE "${SRC}")
+			SET(SRC_LIST ${SRC_LIST} ${SRC}) 
 		else()
 			SET(SRC_LIST ${SRC_LIST} ${CMAKE_CURRENT_LIST_DIR}/${SRC})
 		endif()
