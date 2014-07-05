@@ -76,7 +76,7 @@ std::ostream& operator<<(std::ostream& out, const core::vector3df& v) {
 
 class IrrlichtRunner {
 public:
-	IrrlichtRunner();
+	IrrlichtRunner(irr::IrrlichtDevice* device);
 	~IrrlichtRunner();
 
 	void run();
@@ -89,6 +89,7 @@ private:
 	static const int width = 640;
 	static const int height = 480;
 
+	irr::IrrlichtDevice* device;
 	Speed speed;
 	Speed targetSpeed;
 	Angle yawAngle;
@@ -104,8 +105,8 @@ private:
 	void update(scene::ICameraSceneNode* camera, const Time frameDeltaTime);
 };
 
-IrrlichtRunner::IrrlichtRunner() :
-		speed(0.0_ms), targetSpeed(0.0_ms),
+IrrlichtRunner::IrrlichtRunner(irr::IrrlichtDevice* device) :
+		device(device), speed(0.0_ms), targetSpeed(0.0_ms),
 		yawAngle(0.0_deg), tiltAngle(0.0_deg), rollAngle(0.0_deg),
 		stop(false), frameAvailable(false), frameRequested(false) {
 }
@@ -181,16 +182,6 @@ cv::Mat IrrlichtRunner::captureFrame() {
 
 void IrrlichtRunner::run() {
 	using namespace irr;
-	int width = 640;
-	int height = 480;
-
-	IrrlichtDevice *device = createDevice(video::EDT_OPENGL,
-			core::dimension2d<u32>(width, height));
-
-	if (!device) {
-		throw "Unable to create OpenGL device.";
-	}
-
 	video::IVideoDriver* driver = device->getVideoDriver();
 	scene::ISceneManager* smgr = device->getSceneManager();
 
@@ -262,11 +253,10 @@ void IrrlichtRunner::run() {
 			frameAvailable = false;
 		}
 	}
-	device->drop();
 }
 
-IrrlichtSimulator::IrrlichtSimulator() {
-	runner = std::shared_ptr < IrrlichtRunner > (new IrrlichtRunner());
+IrrlichtSimulator::IrrlichtSimulator(irr::IrrlichtDevice* device) {
+	runner = std::shared_ptr < IrrlichtRunner > (new IrrlichtRunner(device));
 	std::thread thread([&]() {
 		auto r = runner;
 		r->run();

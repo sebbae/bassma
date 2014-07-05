@@ -61,7 +61,17 @@ cv::Mat detectColor(cv::Mat frame) {
 int main(int argc, char* argv[]) {
 	using namespace bassma;
 
-	std::unique_ptr<IrrlichtSimulator> sim(new IrrlichtSimulator());
+	int width = 640;
+	int height = 480;
+
+	irr::IrrlichtDevice* device = irr::createDevice(irr::video::EDT_OPENGL,
+			irr::core::dimension2d<irr::u32>(width, height));
+
+	if (!device) {
+		throw "Unable to create OpenGL device.";
+	}
+
+	std::unique_ptr<IrrlichtSimulator> sim(new IrrlichtSimulator(device));
 	//sim->setSpeed(-40.0_ms);
 
 	while (true) {
@@ -79,6 +89,8 @@ int main(int argc, char* argv[]) {
 		std::chrono::milliseconds duration(500);
 		std::this_thread::sleep_for(duration);
 	}
+
+	device->drop();
 //	std::string s;
 //	std::getline(std::cin, s);
 }

@@ -20,7 +20,7 @@ class IrrlichtRunner;
 
 class IrrlichtSimulator: public VideoSource, public CruiseControl {
 public:
-	IrrlichtSimulator();
+	IrrlichtSimulator(irr::IrrlichtDevice* device);
 	virtual ~IrrlichtSimulator();
 
 	virtual cv::Mat captureFrame();

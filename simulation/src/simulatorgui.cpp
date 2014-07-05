@@ -7,7 +7,18 @@
 
 int main(int argc, char *argv[]) {
 	using namespace bassma;
-	std::unique_ptr<IrrlichtSimulator> sim(new IrrlichtSimulator());
+
+	int width = 640;
+	int height = 480;
+
+	irr::IrrlichtDevice* device = irr::createDevice(irr::video::EDT_OPENGL,
+			irr::core::dimension2d<irr::u32>(width, height));
+
+	if (!device) {
+		throw "Unable to create OpenGL device.";
+	}
+
+	std::unique_ptr<IrrlichtSimulator> sim(new IrrlichtSimulator(device));
 
 	int res = -1;
 
@@ -25,6 +36,8 @@ int main(int argc, char *argv[]) {
 	catch (...) {
 		qCritical() << QString("Unhandled Exception");
 	}
+
+	device->drop();
 
 	return res;
 }
