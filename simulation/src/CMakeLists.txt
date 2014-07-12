@@ -6,6 +6,7 @@ add_exe(simulation simulation.cpp ${IRRLICHT_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_
 
 set(SIMULATOR_SRCS
 	IrrlichtSimulator.cpp
+	IrrlichtRenderer.cpp
 )
 add_lib(simulator.lib "${SIMULATOR_SRCS}")
 add_exe(simulator simulator.cpp simulator.lib ${IRRLICHT_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
