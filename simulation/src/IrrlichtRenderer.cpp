@@ -72,20 +72,19 @@ std::ostream& operator<<(std::ostream& out, const core::vector3df& v) {
 
 class IrrlichtRendererImpl {
 public:
-	IrrlichtRendererImpl(irr::IrrlichtDevice* device);
+	IrrlichtRendererImpl(irr::IrrlichtDevice* device, int width = 640, int height = 480);
 	~IrrlichtRendererImpl();
 
 	void createScene();
-	void updateScene();
+	void updateScene(int width, int height);
 	void run();
 	cv::Mat captureFrame();
 	Speed getSpeed();
 	void setSpeed(Speed speed);
 	void turn(Angle angle);
 private:
-	static const int width = 640;
-	static const int height = 480;
-
+	int width;
+	int height;
 	irr::IrrlichtDevice* device;
 	int lastFPS;
 	u32 then;
@@ -95,10 +94,12 @@ private:
 	Angle tiltAngle;
 	Angle rollAngle;
 
+	void resize(int width, int height);
 	void update(scene::ICameraSceneNode* camera, const Time frameDeltaTime);
 };
 
-IrrlichtRendererImpl::IrrlichtRendererImpl(irr::IrrlichtDevice* device) :
+IrrlichtRendererImpl::IrrlichtRendererImpl(irr::IrrlichtDevice* device, int width, int height) :
+		width(width), height(height),
 		device(device), lastFPS(-1), then(0),
 		speed(0.0_ms), targetSpeed(0.0_ms),
 		yawAngle(0.0_deg), tiltAngle(0.0_deg), rollAngle(0.0_deg) {
@@ -195,7 +196,19 @@ void IrrlichtRendererImpl::createScene() {
 	device->getCursorControl()->setVisible(false);
 }
 
-void IrrlichtRendererImpl::updateScene() {
+void IrrlichtRendererImpl::resize(int width, int height) {
+	using namespace irr;
+	core::dimension2d<u32> size(width, height);
+	device->getVideoDriver()->OnResize(size);
+	scene::ICameraSceneNode* camera = device->getSceneManager()->getActiveCamera();
+	if (camera) {
+		camera->setAspectRatio((f32) size.Height / (f32) size.Width);
+	}
+	this->width = width;
+	this->height = height;
+}
+
+void IrrlichtRendererImpl::updateScene(int width, int height) {
 	using namespace irr;
 	if (!device->run()) {
 		return;
@@ -228,6 +241,9 @@ void IrrlichtRendererImpl::updateScene() {
 	} else {
 		device->yield();
 	}
+	if ((width != this->width) || (height != this->height)) {
+		resize(width, height);
+	}
 }
 
 IrrlichtRenderer::IrrlichtRenderer(irr::IrrlichtDevice* device) {
@@ -237,8 +253,8 @@ IrrlichtRenderer::IrrlichtRenderer(irr::IrrlichtDevice* device) {
 IrrlichtRenderer::~IrrlichtRenderer() {
 }
 
-void IrrlichtRenderer::update() {
-	impl->updateScene();
+void IrrlichtRenderer::update(int width, int height) {
+	impl->updateScene(width, height);
 }
 
 cv::Mat IrrlichtRenderer::captureFrame() {

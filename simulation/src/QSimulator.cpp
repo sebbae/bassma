@@ -28,7 +28,7 @@ void QSimulator::on_actionStart_triggered() {
 
 void QSimulator::timerEvent(QTimerEvent *event) {
 	std::cout << "Updating frame" << std::endl;
-	renderer->update();
+	renderer->update(ui->irrlichtViewer->size().width(), ui->irrlichtViewer->size().height());
 	cv::Mat image = renderer->captureFrame();
 	// Do what you want with the image :-)
 	// Show the image

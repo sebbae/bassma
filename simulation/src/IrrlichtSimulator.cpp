@@ -90,6 +90,8 @@ void IrrlichtSimulatorImpl::start(void* windowId, int width, int height) {
 	std::thread thread([&]() {
 		using namespace irr;
 		typedef IrrlichtDevice IrrDev;
+		int w = width;
+		int h = height;
 
 		auto device = std::unique_ptr < IrrDev, std::function<void(IrrDev*)> > (
 				windowId ? createGuestDevice(windowId, width, height) : createNativeDevice(width, height), [](IrrDev* d){ d->drop();});
@@ -102,7 +104,7 @@ void IrrlichtSimulatorImpl::start(void* windowId, int width, int height) {
 				condition.notify_all();
 			}
 			while (!terminate && device->run()) {
-				renderer->update();
+				renderer->update(w, h);
 				std::unique_lock < std::mutex > lock(frameMutex);
 				if (frameRequested) {
 					frame = renderer->captureFrame();

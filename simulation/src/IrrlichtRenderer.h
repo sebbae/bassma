@@ -23,7 +23,7 @@ public:
 	IrrlichtRenderer(irr::IrrlichtDevice* device);
 	virtual ~IrrlichtRenderer();
 
-	void update();
+	void update(int width, int height);
 
 	virtual cv::Mat captureFrame();
 
