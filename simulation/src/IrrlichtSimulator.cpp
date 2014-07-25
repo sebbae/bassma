@@ -18,38 +18,6 @@
 
 namespace bassma {
 
-irr::IrrlichtDevice* createNativeDevice(int width, int height) {
-	using namespace irr;
-	return createDevice(video::EDT_OPENGL, core::dimension2d<u32>(width, height));
-}
-
-irr::IrrlichtDevice* createGuestDevice(void* windowId, int width, int height) {
-	using namespace irr;
-	// Set all the device creation parameters
-	SIrrlichtCreationParameters params;
-	params.AntiAlias = 0;
-	params.Bits = 32;
-	params.DeviceType = EIDT_X11;
-	params.Doublebuffer = true;
-	params.DriverType = video::EDT_OPENGL;
-	params.EventReceiver = 0;
-	params.Fullscreen = false;
-	params.HighPrecisionFPU = false;
-	params.IgnoreInput = false;
-	params.LoggingLevel = ELL_INFORMATION;
-	params.Stencilbuffer = true;
-	params.Stereobuffer = false;
-	params.Vsync = false;
-	// Specify which window/widget to render to
-	params.WindowId = windowId;
-	params.WindowSize.Width = width;
-	params.WindowSize.Height = height;
-	params.WithAlphaChannel = false;
-	params.ZBufferBits = 16;
-	// Create the Irrlicht Device with the previously specified parameters
-	return createDeviceEx(params);
-}
-
 class IrrlichtSimulatorImpl  {
 public:
 	IrrlichtSimulatorImpl(void* windowId, int width = 640, int height = 480);
@@ -92,28 +60,21 @@ void IrrlichtSimulatorImpl::start(void* windowId, int width, int height) {
 		typedef IrrlichtDevice IrrDev;
 		int w = width;
 		int h = height;
-
-		auto device = std::unique_ptr < IrrDev, std::function<void(IrrDev*)> > (
-				windowId ? createGuestDevice(windowId, width, height) : createNativeDevice(width, height), [](IrrDev* d){ d->drop();});
-
-		if (device) {
-			renderer = std::shared_ptr < IrrlichtRenderer > (new IrrlichtRenderer(device.get()));
-			{
-				std::unique_lock < std::mutex > lock(mutex);
-				ready = true;
-				condition.notify_all();
-			}
-			while (!terminate && device->run()) {
-				renderer->update(w, h);
-				std::unique_lock < std::mutex > lock(frameMutex);
-				if (frameRequested) {
-					frame = renderer->captureFrame();
-					frameCondition.notify_all();
-					frameAvailable = true;
-					frameRequested = false;
-				} else {
-					frameAvailable = false;
-				}
+		renderer = std::shared_ptr < IrrlichtRenderer > (new IrrlichtRenderer(windowId, width, height));
+		{
+			std::unique_lock < std::mutex > lock(mutex);
+			ready = true;
+			condition.notify_all();
+		}
+		while (!terminate && renderer->update(w, h)) {
+			std::unique_lock < std::mutex > lock(frameMutex);
+			if (frameRequested) {
+				frame = renderer->captureFrame();
+				frameCondition.notify_all();
+				frameAvailable = true;
+				frameRequested = false;
+			} else {
+				frameAvailable = false;
 			}
 		}
 		terminate = true;

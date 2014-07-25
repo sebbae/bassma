@@ -1,12 +1,13 @@
-ADD_SUBDIRECTORY(irrlicht)
-ADD_SUBDIRECTORY(ogre)
-ADD_SUBDIRECTORY(qt)
+#ADD_SUBDIRECTORY(irrlicht)
+#ADD_SUBDIRECTORY(ogre)
+#ADD_SUBDIRECTORY(qt)
 
 add_exe(simulation simulation.cpp ${IRRLICHT_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
 set(SIMULATOR_SRCS
 	IrrlichtSimulator.cpp
 	IrrlichtRenderer.cpp
+	OpenCVWebcam.cpp
 )
 add_lib(simulator.lib "${SIMULATOR_SRCS}")
 add_exe(simulator simulator.cpp simulator.lib ${IRRLICHT_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
@@ -43,7 +44,7 @@ set(SIMULATORGUI_SRCS
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_lib(simulatorgui.lib "${SIMULATORGUI_SRCS}")
-add_exe(simulatorgui simulatorgui.cpp simulatorgui.lib ${QT_LIBRARIES} ${IRRLICHT_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+add_exe(simulatorgui simulatorgui.cpp simulatorgui.lib ${IRRLICHT_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
 
 copy_dir(${CMAKE_SOURCE_DIR}/media ${CMAKE_CURRENT_BINARY_DIR}/../media simulation)

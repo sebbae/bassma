@@ -10,13 +10,14 @@
 
 #include <QMainWindow>
 #include <memory>
-#include "IrrlichtRenderer.h"
 
 namespace bassma {
 
 namespace Ui {
 	class QSimulator;
 }
+
+class VideoSource;
 
 class QSimulator: public QMainWindow {
 	Q_OBJECT
@@ -26,11 +27,12 @@ public:
 	~QSimulator();
 
 private slots:
-	void on_actionStart_triggered();
+	void on_actionVideoWebcam_triggered();
+	void on_actionVideoIrrlicht_triggered();
 
 private:
 	std::unique_ptr<bassma::Ui::QSimulator> ui;
-	std::unique_ptr<IrrlichtRenderer> renderer;
+	std::unique_ptr<VideoSource> videoSource;
 
 protected:
 	void timerEvent(QTimerEvent *event);

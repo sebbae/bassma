@@ -11,6 +11,7 @@
 #include <opencv2/opencv.hpp>
 #include <irrlicht.h>
 #include <iostream>
+#include <thread>
 #include <cmath>
 #include <GL/gl.h>
 #include <X11/Xlib.h>
@@ -68,15 +69,47 @@ std::ostream& operator<<(std::ostream& out, const core::vector3df& v) {
 	out << "(" << v.X << ", " << v.Y << ", " << v.Z << ")";
 	return out;
 }
+
+irr::IrrlichtDevice* createNativeDevice(int width, int height) {
+	using namespace irr;
+	return createDevice(video::EDT_OPENGL, core::dimension2d<u32>(width, height));
+}
+
+irr::IrrlichtDevice* createGuestDevice(void* windowId, int width, int height) {
+	using namespace irr;
+	// Set all the device creation parameters
+	SIrrlichtCreationParameters params;
+//	params.AntiAlias = 0;
+//	params.Bits = 32;
+//	params.DeviceType = EIDT_X11;
+//	params.Doublebuffer = true;
+//	params.DriverType = video::EDT_OPENGL;
+//	params.EventReceiver = 0;
+//	params.Fullscreen = false;
+//	params.HighPrecisionFPU = false;
+//	params.IgnoreInput = false;
+//	params.LoggingLevel = ELL_INFORMATION;
+//	params.Stencilbuffer = true;
+//	params.Stereobuffer = false;
+//	params.Vsync = false;
+	// Specify which window/widget to render to
+	params.WindowId = reinterpret_cast<void*>(windowId);
+	params.WindowSize.Width = width;
+	params.WindowSize.Height = height;
+//	params.WithAlphaChannel = false;
+//	params.ZBufferBits = 16;
+	// Create the Irrlicht Device with the previously specified parameters
+	return createDeviceEx(params);
+}
 }
 
 class IrrlichtRendererImpl {
 public:
-	IrrlichtRendererImpl(irr::IrrlichtDevice* device, int width = 640, int height = 480);
+	IrrlichtRendererImpl(void* windowId, int width = 640, int height = 480);
 	~IrrlichtRendererImpl();
 
 	void createScene();
-	void updateScene(int width, int height);
+	bool updateScene(int width, int height);
 	void run();
 	cv::Mat captureFrame();
 	Speed getSpeed();
@@ -85,7 +118,7 @@ public:
 private:
 	int width;
 	int height;
-	irr::IrrlichtDevice* device;
+	std::unique_ptr<irr::IrrlichtDevice, std::function<void(irr::IrrlichtDevice*)>> device;
 	int lastFPS;
 	u32 then;
 	Speed speed;
@@ -98,11 +131,14 @@ private:
 	void update(scene::ICameraSceneNode* camera, const Time frameDeltaTime);
 };
 
-IrrlichtRendererImpl::IrrlichtRendererImpl(irr::IrrlichtDevice* device, int width, int height) :
+IrrlichtRendererImpl::IrrlichtRendererImpl(void* windowId, int width, int height) :
 		width(width), height(height),
-		device(device), lastFPS(-1), then(0),
+		lastFPS(-1), then(0),
 		speed(0.0_ms), targetSpeed(0.0_ms),
 		yawAngle(0.0_deg), tiltAngle(0.0_deg), rollAngle(0.0_deg) {
+	typedef irr::IrrlichtDevice IrrDev;
+	device = std::unique_ptr < IrrDev, std::function<void(IrrDev*)> > (
+			windowId ? createGuestDevice(windowId, width, height) : createNativeDevice(width, height), [](IrrDev* d){ d->drop();});
 	createScene();
 }
 
@@ -208,12 +244,15 @@ void IrrlichtRendererImpl::resize(int width, int height) {
 	this->height = height;
 }
 
-void IrrlichtRendererImpl::updateScene(int width, int height) {
+bool IrrlichtRendererImpl::updateScene(int width, int height) {
 	using namespace irr;
 	if (!device->run()) {
-		return;
+		return false;
 	}
-	if (device->isWindowActive()) {
+	if ((width != this->width) || (height != this->height)) {
+		resize(width, height);
+	}
+	if (true || device->isWindowActive()) {
 		video::IVideoDriver* driver = device->getVideoDriver();
 		scene::ISceneManager* smgr = device->getSceneManager();
 		scene::ICameraSceneNode* camera = smgr->getActiveCamera();
@@ -241,20 +280,18 @@ void IrrlichtRendererImpl::updateScene(int width, int height) {
 	} else {
 		device->yield();
 	}
-	if ((width != this->width) || (height != this->height)) {
-		resize(width, height);
-	}
+	return true;
 }
 
-IrrlichtRenderer::IrrlichtRenderer(irr::IrrlichtDevice* device) {
-	impl = std::unique_ptr < IrrlichtRendererImpl > (new IrrlichtRendererImpl(device));
+IrrlichtRenderer::IrrlichtRenderer(void* windowId, int width, int height) {
+	impl = std::unique_ptr < IrrlichtRendererImpl > (new IrrlichtRendererImpl(windowId, width, height));
 }
 
 IrrlichtRenderer::~IrrlichtRenderer() {
 }
 
-void IrrlichtRenderer::update(int width, int height) {
-	impl->updateScene(width, height);
+bool IrrlichtRenderer::update(int width, int height) {
+	return impl->updateScene(width, height);
 }
 
 cv::Mat IrrlichtRenderer::captureFrame() {

@@ -4,6 +4,7 @@
 
 #include "IrrlichtSimulator.h"
 #include "QSimulator.h"
+#include "QIrrlichtWidget.h"
 
 int main(int argc, char *argv[]) {
 	using namespace bassma;
@@ -13,6 +14,7 @@ int main(int argc, char *argv[]) {
 	try {
 		QApplication a(argc, argv);
 		bassma::QSimulator w(nullptr);
+		//bassma::QIrrlichtWidget w(nullptr);
 		w.show();
 
 		res = a.exec();

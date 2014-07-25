@@ -20,10 +20,10 @@ class IrrlichtRendererImpl;
 
 class IrrlichtRenderer: public VideoSource, public CruiseControl {
 public:
-	IrrlichtRenderer(irr::IrrlichtDevice* device);
+	IrrlichtRenderer(void* windowId = nullptr, int width = 640, int height = 480);
 	virtual ~IrrlichtRenderer();
 
-	void update(int width, int height);
+	bool update(int width, int height);
 
 	virtual cv::Mat captureFrame();
 

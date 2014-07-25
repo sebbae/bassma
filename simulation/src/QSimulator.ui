@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>920</width>
-    <height>500</height>
+    <width>903</width>
+    <height>491</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,17 +15,20 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayoutLeft">
-      <item>
-       <widget class="bassma::QIrrlichtWidget" name="irrlichtViewer" native="true"/>
-      </item>
-     </layout>
+    <item row="1" column="0">
+     <layout class="QFormLayout" name="controlLayout"/>
     </item>
-    <item row="0" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayoutRight">
-      <item>
-       <widget class="bassma::QOpenCVWidget" name="openCVviewer" native="true"/>
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="videoLayout">
+      <item row="0" column="0">
+       <widget class="QWidget" name="source" native="true">
+        <layout class="QVBoxLayout" name="verticalLayout_3"/>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="bassma::QOpenCVWidget" name="processed" native="true">
+        <layout class="QVBoxLayout" name="verticalLayout_4"/>
+       </widget>
       </item>
      </layout>
     </item>
@@ -36,17 +39,18 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>934</width>
+     <width>903</width>
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuStart">
+   <widget class="QMenu" name="menuVideo">
     <property name="title">
-     <string>Camera</string>
+     <string>Video Source</string>
     </property>
-    <addaction name="actionStart"/>
+    <addaction name="actionVideoWebcam"/>
+    <addaction name="actionVideoIrrlicht"/>
    </widget>
-   <addaction name="menuStart"/>
+   <addaction name="menuVideo"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -57,9 +61,14 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionStart">
+  <action name="actionVideoWebcam">
    <property name="text">
-    <string>Start</string>
+    <string>Webcam</string>
+   </property>
+  </action>
+  <action name="actionVideoIrrlicht">
+   <property name="text">
+    <string>Irrlicht</string>
    </property>
   </action>
  </widget>
@@ -69,12 +78,6 @@
    <class>bassma::QOpenCVWidget</class>
    <extends>QWidget</extends>
    <header>QOpenCVWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>bassma::QIrrlichtWidget</class>
-   <extends>QWidget</extends>
-   <header>QIrrlichtWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
