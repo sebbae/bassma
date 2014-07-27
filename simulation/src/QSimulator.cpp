@@ -9,7 +9,7 @@
 
 #include "QSimulator.h"
 #include "ui_QSimulator.h"
-#include "OpenCVWebcam.h"
+#include "QOpenCVWebcamWidget.h"
 
 namespace bassma {
 
@@ -25,8 +25,11 @@ QSimulator::~QSimulator() {
 
 void QSimulator::on_actionVideoWebcam_triggered() {
 	std::cout << "on_actionVideoWebcam_triggered" << std::endl;
-	videoSource.reset();
-	videoSource = std::unique_ptr<VideoSource>(new OpenCVWebcam());
+	ui->videoLayout->removeWidget(ui->source);
+	ui->source->close();
+	ui->source = new QOpenCVWebcamWidget(ui->centralWidget);
+	ui->videoLayout->addWidget(ui->source, 0,0,1,1);
+	ui->videoLayout->update();
 	startTimer(10);
 }
 
@@ -35,14 +38,17 @@ void QSimulator::on_actionVideoIrrlicht_triggered() {
 	//startTimer(10);
 }
 
-void QSimulator::timerEvent(QTimerEvent *event) {
+void QSimulator::timerEvent(QTimerEvent* event) {
 	std::cout << "Updating frame" << std::endl;
 	//renderer->update(ui->irrlichtViewer->size().width(), ui->irrlichtViewer->size().height());
-	cv::Mat image = videoSource->captureFrame();
+	cv::Mat image = static_cast<QOpenCVWebcamWidget*>(ui->source)->captureFrame();
 	// Do what you want with the image :-)
 	// Show the image
-	ui->processed->showImage(image);
+	if (!image.empty()) {
+		ui->processed->showImage(image);
+	}
 	std::cout << "Updated frame" << std::endl;
+	event->accept();
 }
 
 } /* namespace bassma */

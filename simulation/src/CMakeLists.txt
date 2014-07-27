@@ -17,6 +17,7 @@ add_exe(main main.cpp ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 set(SIMULATORGUI_MOC_HDRS
 	QIrrlichtWidget.h
 	QOpenCVWidget.h
+	QOpenCVWebcamWidget.h
 	QSimulator.h
 )
 
@@ -34,6 +35,7 @@ QT4_WRAP_CPP(SIMULATORGUI_MOC_SRCS ${SIMULATORGUI_MOC_HDRS})
 set(SIMULATORGUI_SRCS
 	QIrrlichtWidget.cpp
 	QOpenCVWidget.cpp
+	QOpenCVWebcamWidget.cpp
 	QSimulator.cpp
 	${SIMULATORGUI_MOC_SRCS}
 	${SIMULATORGUI_RC_SRCS}

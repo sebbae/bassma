@@ -32,7 +32,7 @@ private slots:
 
 private:
 	std::unique_ptr<bassma::Ui::QSimulator> ui;
-	std::unique_ptr<VideoSource> videoSource;
+	VideoSource* videoSource;
 
 protected:
 	void timerEvent(QTimerEvent *event);
