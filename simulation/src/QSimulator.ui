@@ -20,14 +20,14 @@
     </item>
     <item row="0" column="0">
      <layout class="QGridLayout" name="videoLayout">
-      <item row="0" column="0">
-       <widget class="QWidget" name="source" native="true">
-        <layout class="QVBoxLayout" name="verticalLayout_3"/>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="bassma::QOpenCVWidget" name="processed" native="true">
         <layout class="QVBoxLayout" name="verticalLayout_4"/>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QWidget" name="source" native="true">
+        <layout class="QVBoxLayout" name="verticalLayout_3"/>
        </widget>
       </item>
      </layout>

@@ -8,7 +8,7 @@
 
 #include <QOpenCVWebcamWidget.h>
 
-#include <QIrrlichtWidget.h>
+#include <QResizeEvent>
 #include <iostream>
 
 namespace bassma {

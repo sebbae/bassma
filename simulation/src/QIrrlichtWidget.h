@@ -13,17 +13,19 @@
 #include <memory>
 #include <irrlicht.h>
 
-#include "IrrlichtRenderer.h"
+#include "VideoSource.h"
+#include "IrrlichtSimulator.h"
 
 namespace bassma {
 
-class QIrrlichtWidget: public QWidget {
+class QIrrlichtWidget: public QWidget, public VideoSource {
 Q_OBJECT
 
 public:
 	explicit QIrrlichtWidget(QWidget* parent = 0);
 	~QIrrlichtWidget();
-	void init();
+
+	virtual cv::Mat captureFrame();
 
 signals:
 	// Signal that its time to update the frame
@@ -38,7 +40,7 @@ protected:
 	virtual void timerEvent(QTimerEvent* event);
 	virtual void resizeEvent(QResizeEvent* event);
 
-	std::unique_ptr<IrrlichtRenderer> renderer;
+	std::unique_ptr<IrrlichtSimulator> renderer;
 
 };
 

@@ -7,6 +7,7 @@
 
 #include <QIrrlichtWidget.h>
 #include <QtCore/QDebug>
+#include <opencv2/core/core.hpp>
 
 #include <iostream>
 
@@ -28,12 +29,9 @@ QIrrlichtWidget::QIrrlichtWidget(QWidget* parent) :
 	// Not sure if this is necessary, but it was in the code I am basing this solution off of
 	setAutoFillBackground(false);
 	std::cout << " QIrrlichtWidget()" << " with winId " << reinterpret_cast<void*>(this->winId()) << std::endl;
-	init();
-}
 
-void QIrrlichtWidget::init() {
-	renderer = std::unique_ptr < IrrlichtRenderer > (new IrrlichtRenderer(reinterpret_cast<void*>(this->winId()), size().width(), size().height()));
-	renderer->setSpeed(1.0_ms);
+	renderer = std::unique_ptr < IrrlichtSimulator > (new IrrlichtSimulator(reinterpret_cast<void*>(this->winId()), parent->size().width(), parent->size().height()));//std::unique_ptr < IrrlichtRenderer > (new IrrlichtRenderer(reinterpret_cast<void*>(this->winId()), parent->size().width(), parent->size().height()));
+	//renderer->setSpeed(1.0_ms);
 	// Connect the update signal (updateQuery) to the update slot (update)
 	connect(this, SIGNAL(updateQuery()), this, SLOT(update()));
 

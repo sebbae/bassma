@@ -10,6 +10,7 @@
 #include "QSimulator.h"
 #include "ui_QSimulator.h"
 #include "QOpenCVWebcamWidget.h"
+#include "QIrrlichtWidget.h"
 
 namespace bassma {
 
@@ -27,7 +28,8 @@ void QSimulator::on_actionVideoWebcam_triggered() {
 	std::cout << "on_actionVideoWebcam_triggered" << std::endl;
 	ui->videoLayout->removeWidget(ui->source);
 	ui->source->close();
-	ui->source = new QOpenCVWebcamWidget(ui->centralWidget);
+	videoSource = new QOpenCVWebcamWidget(ui->centralWidget);
+	ui->source = dynamic_cast<QWidget*>(videoSource);
 	ui->videoLayout->addWidget(ui->source, 0,0,1,1);
 	ui->videoLayout->update();
 	startTimer(10);
@@ -35,13 +37,19 @@ void QSimulator::on_actionVideoWebcam_triggered() {
 
 void QSimulator::on_actionVideoIrrlicht_triggered() {
 	std::cout << "on_actionVideoIrrlicht_triggered" << std::endl;
-	//startTimer(10);
+	ui->videoLayout->removeWidget(ui->source);
+	ui->source->close();
+	videoSource = new QIrrlichtWidget(ui->centralWidget);
+	ui->source = dynamic_cast<QWidget*>(videoSource);
+	ui->videoLayout->addWidget(ui->source, 0,0,1,1);
+	ui->videoLayout->update();
+	startTimer(100);
 }
 
 void QSimulator::timerEvent(QTimerEvent* event) {
 	std::cout << "Updating frame" << std::endl;
 	//renderer->update(ui->irrlichtViewer->size().width(), ui->irrlichtViewer->size().height());
-	cv::Mat image = static_cast<QOpenCVWebcamWidget*>(ui->source)->captureFrame();
+	cv::Mat image = videoSource->captureFrame();
 	// Do what you want with the image :-)
 	// Show the image
 	if (!image.empty()) {

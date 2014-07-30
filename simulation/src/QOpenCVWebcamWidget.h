@@ -14,7 +14,7 @@
 
 namespace bassma {
 
-class QOpenCVWebcamWidget: public QOpenCVWidget, VideoSource {
+class QOpenCVWebcamWidget: public QOpenCVWidget, public VideoSource {
 Q_OBJECT
 
 public:
