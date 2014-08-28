@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 	using namespace bassma;
 
 	std::unique_ptr<IrrlichtSimulator> sim(new IrrlichtSimulator());
-	sim->setSpeed(1.0_ms);
+	sim->setSpeed(30.0_ms);
 
 	while (true) {
 		cv::Mat frame = sim->captureFrame();
