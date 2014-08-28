@@ -5,7 +5,7 @@
  *      Author: sebastian
  */
 
-#include <QIrrlichtWidget.h>
+#include "QIrrlichtWidget.h"
 #include <QtCore/QDebug>
 #include <opencv2/core/core.hpp>
 

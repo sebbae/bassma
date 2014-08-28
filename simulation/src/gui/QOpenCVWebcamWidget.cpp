@@ -5,8 +5,7 @@
  *      Author: sebastian
  */
 
-
-#include <QOpenCVWebcamWidget.h>
+#include "QOpenCVWebcamWidget.h"
 
 #include <QResizeEvent>
 #include <iostream>

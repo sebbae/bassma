@@ -5,7 +5,7 @@
  *      Author: sebastian
  */
 
-#include <IrrlichtRenderer.h>
+#include "IrrlichtRenderer.h"
 
 #include <stdio.h>
 #include <opencv2/opencv.hpp>

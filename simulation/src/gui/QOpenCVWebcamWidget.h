@@ -8,9 +8,9 @@
 #ifndef OPENCVWEBCAMWIDGET_H_
 #define OPENCVWEBCAMWIDGET_H_
 
-#include "VideoSource.h"
+#include "../VideoSource.h"
+#include "../OpenCVWebcam.h"
 #include "QOpenCVWidget.h"
-#include "OpenCVWebcam.h"
 
 namespace bassma {
 

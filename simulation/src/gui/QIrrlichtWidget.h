@@ -13,8 +13,8 @@
 #include <memory>
 #include <irrlicht.h>
 
-#include "VideoSource.h"
-#include "IrrlichtSimulator.h"
+#include "../VideoSource.h"
+#include "../IrrlichtSimulator.h"
 
 namespace bassma {
 

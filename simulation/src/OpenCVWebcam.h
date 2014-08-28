@@ -8,7 +8,7 @@
 #ifndef OPENCVWEBCAM_H_
 #define OPENCVWEBCAM_H_
 
-#include <VideoSource.h>
+#include "VideoSource.h"
 
 #include <memory>
 

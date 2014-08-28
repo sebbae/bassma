@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <memory>
 
-#include "IrrlichtSimulator.h"
+#include "../IrrlichtSimulator.h"
 #include "QSimulator.h"
 #include "QIrrlichtWidget.h"
 

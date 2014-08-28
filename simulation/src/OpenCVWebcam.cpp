@@ -5,7 +5,7 @@
  *      Author: sebastian
  */
 
-#include <OpenCVWebcam.h>
+#include "OpenCVWebcam.h"
 
 #include "opencv2/highgui/highgui.hpp"
 #include <iostream>
