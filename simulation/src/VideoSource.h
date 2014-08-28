@@ -22,6 +22,7 @@ public:
 	VideoSource(const VideoSource& src) = delete;
 	VideoSource& operator=(const VideoSource& src) = delete;
 
+	virtual void resize(int width, int height) = 0;
 	virtual cv::Mat captureFrame() = 0;
 };
 

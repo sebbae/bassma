@@ -22,6 +22,7 @@ public:
 	IrrlichtSimulator(void* windowId = nullptr, int width = 640, int height = 480);
 	virtual ~IrrlichtSimulator();
 
+	virtual void resize(int width, int height);
 	virtual cv::Mat captureFrame();
 
 	virtual Speed getSpeed();

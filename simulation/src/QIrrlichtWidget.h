@@ -25,6 +25,7 @@ public:
 	explicit QIrrlichtWidget(QWidget* parent = 0);
 	~QIrrlichtWidget();
 
+	virtual void resize(int width, int height);
 	virtual cv::Mat captureFrame();
 
 signals:
@@ -40,7 +41,7 @@ protected:
 	virtual void timerEvent(QTimerEvent* event);
 	virtual void resizeEvent(QResizeEvent* event);
 
-	std::unique_ptr<IrrlichtSimulator> renderer;
+	std::unique_ptr<IrrlichtSimulator> simulator;
 
 };
 

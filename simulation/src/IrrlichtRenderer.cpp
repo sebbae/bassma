@@ -94,8 +94,8 @@ irr::IrrlichtDevice* createGuestDevice(void* windowId, int width, int height) {
 //	params.Vsync = false;
 	// Specify which window/widget to render to
 	params.WindowId = reinterpret_cast<void*>(windowId);
-	params.WindowSize.Width = width;
-	params.WindowSize.Height = height;
+	params.WindowSize.Width = 640; // width;
+	params.WindowSize.Height = 480; // height;
 //	params.WithAlphaChannel = false;
 //	params.ZBufferBits = 16;
 	// Create the Irrlicht Device with the previously specified parameters
@@ -196,12 +196,33 @@ void IrrlichtRendererImpl::update(scene::ICameraSceneNode* camera, const Time fr
 }
 
 cv::Mat IrrlichtRendererImpl::captureFrame() {
-	unsigned char* buffer = new unsigned char[width * height * 3];
-	glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, buffer);
-	cv::Mat tmp(height, width, CV_8UC3, buffer);
-	cv::Mat image;
-	flip(tmp, image, 0);
-	return image;
+	if (true) {
+		// take screenshot via Irrlicht API
+		typedef std::unique_ptr<irr::video::IImage> IImageUPtr;
+		IImageUPtr img = IImageUPtr(device->getVideoDriver()->createScreenShot());
+		irr::core::dimension2d<unsigned int> dim = img->getDimension();
+
+		// copy pixels to OpenCV BGR image
+		cv::Mat tmp(dim.Height, dim.Width, CV_8UC3);
+		for (int x = 0; x < dim.Width; x++) {
+			for (int y = 0; y < dim.Height; y++) {
+				cv::Vec3b& bgrPixel = tmp.at<cv::Vec3b>(y, x);
+				irr::video::SColor p = img->getPixel(x, y);
+				bgrPixel[0] = p.getBlue();
+				bgrPixel[1] = p.getGreen();
+				bgrPixel[2] = p.getRed();
+			}
+		}
+		return tmp;
+	} else {
+		// copy OpenGL buffer to OpenCV BGR image
+		unsigned char* buffer = new unsigned char[width * height * 3];
+		glReadPixels(0, 0, width, height, GL_BGR, GL_UNSIGNED_BYTE, buffer);
+		cv::Mat tmp(height, width, CV_8UC3, buffer);
+		cv::Mat image;
+		flip(tmp, image, 0); // OpenGL stores image different than OpenCV
+		return image;
+	}
 }
 
 void IrrlichtRendererImpl::createScene() {
@@ -233,12 +254,13 @@ void IrrlichtRendererImpl::createScene() {
 }
 
 void IrrlichtRendererImpl::resize(int width, int height) {
+	std::cout << "IrrlichtRendererImpl::resize " << width << " x " << height << std::endl;
 	using namespace irr;
 	core::dimension2d<u32> size(width, height);
 	device->getVideoDriver()->OnResize(size);
 	scene::ICameraSceneNode* camera = device->getSceneManager()->getActiveCamera();
 	if (camera) {
-		camera->setAspectRatio((f32) size.Height / (f32) size.Width);
+		camera->setAspectRatio((f32) size.Width / (f32) size.Height);
 	}
 	this->width = width;
 	this->height = height;
@@ -248,9 +270,6 @@ bool IrrlichtRendererImpl::updateScene(int width, int height) {
 	using namespace irr;
 	if (!device->run()) {
 		return false;
-	}
-	if ((width != this->width) || (height != this->height)) {
-		resize(width, height);
 	}
 	if (true || device->isWindowActive()) {
 		video::IVideoDriver* driver = device->getVideoDriver();
@@ -265,6 +284,9 @@ bool IrrlichtRendererImpl::updateScene(int width, int height) {
 		update(camera, Time(frameDeltaTime));
 
 		driver->beginScene(true, true, video::SColor(255, 200, 200, 200));
+		if ((width != this->width) || (height != this->height)) {
+			resize(width, height);
+		}
 		smgr->drawAll();
 		driver->endScene();
 
@@ -290,8 +312,8 @@ IrrlichtRenderer::IrrlichtRenderer(void* windowId, int width, int height) {
 IrrlichtRenderer::~IrrlichtRenderer() {
 }
 
-bool IrrlichtRenderer::update(int width, int height) {
-	return impl->updateScene(width, height);
+void IrrlichtRenderer::resize(int width, int height) {
+	impl->updateScene(width, height);
 }
 
 cv::Mat IrrlichtRenderer::captureFrame() {

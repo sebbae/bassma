@@ -21,6 +21,7 @@ public:
 	OpenCVWebcam();
 	virtual ~OpenCVWebcam();
 
+	virtual void resize(int width, int height);
 	virtual cv::Mat captureFrame();
 
 private:

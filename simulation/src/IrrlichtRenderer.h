@@ -23,8 +23,7 @@ public:
 	IrrlichtRenderer(void* windowId = nullptr, int width = 640, int height = 480);
 	virtual ~IrrlichtRenderer();
 
-	bool update(int width, int height);
-
+	virtual void resize(int width, int height);
 	virtual cv::Mat captureFrame();
 
 	virtual Speed getSpeed();

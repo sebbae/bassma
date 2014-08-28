@@ -21,6 +21,7 @@ public:
 	explicit QOpenCVWebcamWidget(QWidget* parent = 0);
 	virtual ~QOpenCVWebcamWidget();
 
+	virtual void resize(int width, int height);
 	virtual cv::Mat captureFrame();
 
 signals:

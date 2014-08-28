@@ -21,6 +21,10 @@ QOpenCVWebcamWidget::QOpenCVWebcamWidget(QWidget* parent) : QOpenCVWidget(parent
 QOpenCVWebcamWidget::~QOpenCVWebcamWidget() {
 }
 
+void QOpenCVWebcamWidget::resize(int width, int height) {
+	webcam.resize(width, height);
+}
+
 cv::Mat QOpenCVWebcamWidget::captureFrame() {
 	return webcam.captureFrame();
 }

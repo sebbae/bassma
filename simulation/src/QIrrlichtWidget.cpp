@@ -29,8 +29,9 @@ QIrrlichtWidget::QIrrlichtWidget(QWidget* parent) :
 	// Not sure if this is necessary, but it was in the code I am basing this solution off of
 	setAutoFillBackground(false);
 	std::cout << " QIrrlichtWidget()" << " with winId " << reinterpret_cast<void*>(this->winId()) << std::endl;
-
-	renderer = std::unique_ptr < IrrlichtSimulator > (new IrrlichtSimulator(reinterpret_cast<void*>(this->winId()), parent->size().width(), parent->size().height()));//std::unique_ptr < IrrlichtRenderer > (new IrrlichtRenderer(reinterpret_cast<void*>(this->winId()), parent->size().width(), parent->size().height()));
+	void* winId = reinterpret_cast<void*>(this->winId());
+	QSize size = this->size();
+	simulator = std::unique_ptr<IrrlichtSimulator>(new IrrlichtSimulator(winId, size.width(), size.height()));
 	//renderer->setSpeed(1.0_ms);
 	// Connect the update signal (updateQuery) to the update slot (update)
 	connect(this, SIGNAL(updateQuery()), this, SLOT(update()));
@@ -59,7 +60,16 @@ void QIrrlichtWidget::resizeEvent(QResizeEvent* event) {
 }
 
 void QIrrlichtWidget::update() {
-	renderer->update(this->size().width(), this->size().height());
+	QSize size = this->size();
+	simulator->resize(size.width(), size.height());
+}
+
+void QIrrlichtWidget::resize(int width, int height) {
+	simulator->resize(width, height);
+}
+
+cv::Mat QIrrlichtWidget::captureFrame() {
+	return simulator->captureFrame();
 }
 
 } /* namespace bassma */

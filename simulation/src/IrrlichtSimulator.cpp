@@ -23,13 +23,17 @@ public:
 	IrrlichtSimulatorImpl(void* windowId, int width = 640, int height = 480);
 	virtual ~IrrlichtSimulatorImpl();
 
+	virtual void resize(int width, int height);
 	virtual cv::Mat captureFrame();
 
 	virtual Speed getSpeed();
 	virtual void setSpeed(Speed speed);
 	virtual void turn(Angle angle);
 private:
+	std::thread thread;
 	std::shared_ptr<IrrlichtRenderer> renderer;
+	std::atomic<int> width;
+	std::atomic<int> height;
 	std::atomic<bool> terminate;
 	std::atomic<bool> frameAvailable;
 	std::atomic<bool> frameRequested;
@@ -37,36 +41,35 @@ private:
 	std::mutex frameMutex;
 	std::condition_variable frameCondition;
 
-	virtual void start(void* windowId, int width, int height);
+	virtual void start(void* windowId);
 	virtual void stop();
 };
 
 IrrlichtSimulatorImpl::IrrlichtSimulatorImpl(void* windowId, int width, int height) :
-		terminate(false), frameAvailable(false), frameRequested(false)  {
-	start(windowId, width, height);
+		width(width), height(height), terminate(false), frameAvailable(false), frameRequested(false)  {
+	start(windowId);
 }
 
 IrrlichtSimulatorImpl::~IrrlichtSimulatorImpl() {
 	stop();
 }
 
-void IrrlichtSimulatorImpl::start(void* windowId, int width, int height) {
+void IrrlichtSimulatorImpl::start(void* windowId) {
 	std::atomic<bool> ready(false);
 	std::mutex mutex;
 	std::condition_variable condition;
 
-	std::thread thread([&]() {
+	thread = std::thread([&]() {
 		using namespace irr;
 		typedef IrrlichtDevice IrrDev;
-		int w = width;
-		int h = height;
 		renderer = std::shared_ptr < IrrlichtRenderer > (new IrrlichtRenderer(windowId, width, height));
 		{
 			std::unique_lock < std::mutex > lock(mutex);
 			ready = true;
 			condition.notify_all();
 		}
-		while (!terminate && renderer->update(w, h)) {
+		while (!terminate) {
+			renderer->resize(width, height);
 			std::unique_lock < std::mutex > lock(frameMutex);
 			if (frameRequested) {
 				frame = renderer->captureFrame();
@@ -79,7 +82,6 @@ void IrrlichtSimulatorImpl::start(void* windowId, int width, int height) {
 		}
 		terminate = true;
 	});
-	thread.detach();
 
 	std::unique_lock < std::mutex > lock(mutex);
 	if (!ready) {
@@ -89,6 +91,14 @@ void IrrlichtSimulatorImpl::start(void* windowId, int width, int height) {
 
 void IrrlichtSimulatorImpl::stop() {
 	terminate = true;
+	if (thread.joinable()) {
+		thread.join();
+	}
+}
+
+void IrrlichtSimulatorImpl::resize(int width, int height) {
+	this->width = width;
+	this->height = height;
 }
 
 cv::Mat IrrlichtSimulatorImpl::captureFrame() {
@@ -120,6 +130,10 @@ IrrlichtSimulator::IrrlichtSimulator(void* windowId, int width, int height) {
 }
 
 IrrlichtSimulator::~IrrlichtSimulator() {
+}
+
+void IrrlichtSimulator::resize(int width, int height) {
+	impl->resize(width, height);
 }
 
 cv::Mat IrrlichtSimulator::captureFrame() {
