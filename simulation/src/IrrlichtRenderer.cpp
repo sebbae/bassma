@@ -182,6 +182,28 @@ void IrrlichtRendererImpl::update(scene::ICameraSceneNode* camera,
 			camPosition.Y + moveAt.Y * dist.val,
 			camPosition.Z + moveAt.Z * dist.val);
 
+    core::line3d<f32> ray;
+    ray.start = camera->getPosition();
+    ray.end = ray.start + (camera->getTarget() - ray.start).normalize() * 1000.0f;
+    core::vector3df intersection;
+    core::triangle3df hitTriangle;
+    scene::ISceneCollisionManager* collMan = device->getSceneManager()->getSceneCollisionManager();
+    scene::ISceneNode * selectedSceneNode =
+        collMan->getSceneNodeAndCollisionPointFromRay(
+                ray,
+                intersection, // This will be the position of the collision
+                hitTriangle, // This will be the triangle hit in the collision
+                0, // This ensures that only nodes that we have
+                        // set up to be pickable are considered
+                0); // Check the entire scene (this is actually the implicit default)
+
+    // If the ray hit anything, move the billboard to the collision position
+    // and draw the triangle that was hit.
+    if(selectedSceneNode)
+    {
+
+    }
+
 	/*
 	 std::cout << "Move " << (camPositionNew - camPosition).getLength()
 	 << " from " << camPosition << " into direction "
@@ -259,19 +281,22 @@ void IrrlichtRendererImpl::createScene() {
 
 	auto mapSelector = IrrObj<scene::ITriangleSelector>(
 			smgr->createOctreeTriangleSelector(map->getMesh(), map, 128), drop);
+	map->setTriangleSelector(mapSelector.get());
 	auto ballSelector = IrrObj<scene::ITriangleSelector>(
 			smgr->createOctreeTriangleSelector(ball->getMesh(), ball, 128), drop);
+	ball->setTriangleSelector(ballSelector.get());
 
 	auto selector = IrrObj<IMetaTriangleSelector>(smgr->createMetaTriangleSelector(), drop);
 	selector->addTriangleSelector(mapSelector.get());
 	selector->addTriangleSelector(ballSelector.get());
 
+	/*
 	auto anim = IrrObj<scene::ISceneNodeAnimator>(
 			smgr->createCollisionResponseAnimator(selector.get(), camera,
 					core::vector3df(60, 50, 1.0012), core::vector3df(0, -10, 0),
 					core::vector3df(0, 0, 0)), drop);
 	camera->addAnimator(anim.get());
-
+	 */
 	device->getCursorControl()->setVisible(false);
 }
 

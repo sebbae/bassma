@@ -10,7 +10,7 @@
 #include "QSimulator.h"
 #include "ui_QSimulator.h"
 #include "QOpenCVWebcamWidget.h"
-#include "QIrrlichtWidget.h"
+#include "QSimulation.h"
 
 namespace bassma {
 
@@ -41,7 +41,7 @@ void QSimulator::on_actionVideoIrrlicht_triggered() {
 	ui->videoLayout->removeWidget(ui->source);
 	ui->source->close();
 	delete videoSource;
-	videoSource = new QIrrlichtWidget(ui->centralWidget);
+	videoSource = new QSimulation(ui->centralWidget);
 	ui->source = dynamic_cast<QWidget*>(videoSource);
 	ui->videoLayout->addWidget(ui->source, 0,0,1,1);
 	ui->videoLayout->update();
@@ -56,5 +56,10 @@ void QSimulator::timerEvent(QTimerEvent* event) {
 	}
 	event->accept();
 }
+
+void QSimulator::setSpeed(int speed) {
+	std::cout << "setSpeed(" << speed << ")" << std::endl;
+}
+
 
 } /* namespace bassma */

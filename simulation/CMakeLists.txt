@@ -52,6 +52,11 @@ endif()
 find_package(Irrlicht REQUIRED)
 
 ########################
+# Bullet               #
+########################
+find_package(Bullet REQUIRED)
+
+########################
 # OpenCV               #
 ########################
 find_package(OpenCV REQUIRED)
@@ -109,6 +114,7 @@ include_directories(
 	${OGRE_SAMPLES_INCLUDEPATH}
 	${OGRE_Overlay_INCLUDE_DIRS}
 	${IRRLICHT_INCLUDE_DIRS}
+	${BULLET_INCLUDE_DIR}
 	${OPENGL_INCLUDE_DIRS}
 	${GLUT_INCLUDE_DIRS}
 	${CMAKE_BINARY_DIR}

@@ -2,10 +2,12 @@ set(SIMULATORGUI_MOC_HDRS
 	QIrrlichtWidget.h
 	QOpenCVWidget.h
 	QOpenCVWebcamWidget.h
+	QSimulation.h
 	QSimulator.h
 )
 
 set(SIMULATORGUI_UIS
+	QSimulation.ui
 	QSimulator.ui
 )
 
@@ -20,6 +22,7 @@ set(SIMULATORGUI_SRCS
 	QIrrlichtWidget.cpp
 	QOpenCVWidget.cpp
 	QOpenCVWebcamWidget.cpp
+	QSimulation.cpp
 	QSimulator.cpp
 	${SIMULATORGUI_MOC_SRCS}
 	${SIMULATORGUI_RC_SRCS}

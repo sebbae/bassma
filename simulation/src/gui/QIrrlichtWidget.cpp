@@ -30,7 +30,7 @@ QIrrlichtWidget::QIrrlichtWidget(QWidget* parent) :
 	setAutoFillBackground(false);
 	std::cout << " QIrrlichtWidget()" << " with winId " << reinterpret_cast<void*>(this->winId()) << std::endl;
 	void* winId = reinterpret_cast<void*>(this->winId());
-	QSize size = this->size();
+	QSize size = this->maximumSize();
 	simulator = std::unique_ptr<IrrlichtSimulator>(new IrrlichtSimulator(winId, size.width(), size.height()));
 	//renderer->setSpeed(1.0_ms);
 	// Connect the update signal (updateQuery) to the update slot (update)
@@ -55,6 +55,7 @@ void QIrrlichtWidget::timerEvent(QTimerEvent* event) {
 }
 
 void QIrrlichtWidget::resizeEvent(QResizeEvent* event) {
+	std::cout << "QIrrlichtWidget resize event " << event << std::endl;
 	update();
 	QWidget::resizeEvent(event);
 }
@@ -70,6 +71,22 @@ void QIrrlichtWidget::resize(int width, int height) {
 
 cv::Mat QIrrlichtWidget::captureFrame() {
 	return simulator->captureFrame();
+}
+
+Speed QIrrlichtWidget::getSpeed() {
+	return simulator->getSpeed();
+}
+
+void QIrrlichtWidget::setSpeed(Speed speed) {
+	simulator->setSpeed(speed);
+}
+
+void QIrrlichtWidget::turn(Angle angle) {
+	simulator->turn(angle);
+}
+
+void QIrrlichtWidget::setSpeed(int speed) {
+	setSpeed(Speed(speed));
 }
 
 } /* namespace bassma */

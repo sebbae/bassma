@@ -15,19 +15,54 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
-     <layout class="QFormLayout" name="controlLayout"/>
-    </item>
     <item row="0" column="0">
      <layout class="QGridLayout" name="videoLayout">
       <item row="0" column="1">
-       <widget class="bassma::QOpenCVWidget" name="processed" native="true">
-        <layout class="QVBoxLayout" name="verticalLayout_4"/>
+       <widget class="QWidget" name="source" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>320</width>
+          <height>240</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>640</width>
+          <height>480</height>
+         </size>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QWidget" name="source" native="true">
-        <layout class="QVBoxLayout" name="verticalLayout_3"/>
+      <item row="0" column="2">
+       <widget class="bassma::QOpenCVWidget" name="processed" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>320</width>
+          <height>240</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>640</width>
+          <height>480</height>
+         </size>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4"/>
        </widget>
       </item>
      </layout>
@@ -83,4 +118,7 @@
  </customwidgets>
  <resources/>
  <connections/>
+ <slots>
+  <slot>setSpeed(int)</slot>
+ </slots>
 </ui>

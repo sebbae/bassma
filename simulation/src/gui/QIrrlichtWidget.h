@@ -14,11 +14,12 @@
 #include <irrlicht.h>
 
 #include "../VideoSource.h"
+#include "../CruiseControl.h"
 #include "../IrrlichtSimulator.h"
 
 namespace bassma {
 
-class QIrrlichtWidget: public QWidget, public VideoSource {
+class QIrrlichtWidget: public QWidget, public VideoSource, public CruiseControl {
 Q_OBJECT
 
 public:
@@ -28,6 +29,10 @@ public:
 	virtual void resize(int width, int height);
 	virtual cv::Mat captureFrame();
 
+	virtual Speed getSpeed();
+	virtual void setSpeed(Speed speed);
+	virtual void turn(Angle angle);
+
 signals:
 	// Signal that its time to update the frame
 	void updateQuery();
@@ -35,6 +40,7 @@ signals:
 public slots:
 	// Function called in response to updateIrrlichtQuery. Renders the scene in the widget
 	void update();
+	void setSpeed(int speed);
 
 protected:
 	virtual void paintEvent(QPaintEvent* event);

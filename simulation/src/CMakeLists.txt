@@ -1,5 +1,5 @@
-#ADD_SUBDIRECTORY(examples)
-#ADD_SUBDIRECTORY(gui)
+ADD_SUBDIRECTORY(examples)
+ADD_SUBDIRECTORY(gui)
 
 set(SIMULATOR_SRCS
 	IrrlichtSimulator.cpp

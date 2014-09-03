@@ -29,6 +29,7 @@ public:
 private slots:
 	void on_actionVideoWebcam_triggered();
 	void on_actionVideoIrrlicht_triggered();
+	void setSpeed(int speed);
 
 private:
 	std::unique_ptr<bassma::Ui::QSimulator> ui;
