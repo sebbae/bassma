@@ -54,7 +54,7 @@ using Acceleration = Value<Unit<1,0,-2>>;
 
 struct Angle {
 	double val;
-	explicit constexpr Angle(double d) : val(d) {}
+	explicit constexpr Angle(double d) : val(((d > 360.0) || (d < -360.0)) ? (d / 360.0) : d) {}
 	const Angle operator+(const Angle& rhs) {
 		return Angle(val + rhs.val);
 	}
@@ -65,6 +65,24 @@ struct Angle {
 		return Angle(-val);
 	}
 	Angle& operator+=(const Angle& rhs) {
+		val += rhs.val;
+		return *this;
+	}
+};
+
+struct AngularVelocity {
+	double val;
+	explicit constexpr AngularVelocity(double d) : val(d) {}
+	const AngularVelocity operator+(const AngularVelocity& rhs) {
+		return AngularVelocity(val + rhs.val);
+	}
+	const AngularVelocity operator-(const AngularVelocity& rhs) {
+		return AngularVelocity(val -rhs.val);
+	}
+	const AngularVelocity operator-() {
+		return AngularVelocity(-val);
+	}
+	AngularVelocity& operator+=(const AngularVelocity& rhs) {
 		val += rhs.val;
 		return *this;
 	}
@@ -86,6 +104,10 @@ constexpr Angle operator"" _deg(long double d) {
 	return ((d > 360.0) || (d < -360.0)) ? Angle(d / 360.0) : Angle(d);
 }
 
+constexpr AngularVelocity operator"" _deg_s(long double d) {
+	return AngularVelocity(d);
+}
+
 inline Speed operator*(const double& d, const Speed& s) {
 	return Speed(d * s.val);
 }
@@ -104,6 +126,10 @@ inline Distance operator+(const Distance& lhs, const Distance& rhs) {
 
 inline Acceleration operator*(const double& d, const Acceleration& v) {
 	return Acceleration(d * v.val);
+}
+
+inline Angle operator*(const AngularVelocity& v, const Time& t) {
+	return Angle(v.val * t.val);
 }
 
 } /* namespace bassma */

@@ -27,7 +27,7 @@ public:
 
 	virtual Speed getSpeed();
 	virtual void setSpeed(Speed speed);
-	virtual void turn(Angle angle);
+	virtual void turn(AngularVelocity velocity);
 private:
 	std::shared_ptr<IrrlichtSimulatorImpl> impl;
 };

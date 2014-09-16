@@ -31,7 +31,7 @@ public:
 
 	virtual Speed getSpeed();
 	virtual void setSpeed(Speed speed);
-	virtual void turn(Angle angle);
+	virtual void turn(AngularVelocity velocity);
 
 signals:
 	// Signal that its time to update the frame
@@ -41,6 +41,7 @@ public slots:
 	// Function called in response to updateIrrlichtQuery. Renders the scene in the widget
 	void update();
 	void setSpeed(int speed);
+	void turn(int velocity);
 
 protected:
 	virtual void paintEvent(QPaintEvent* event);

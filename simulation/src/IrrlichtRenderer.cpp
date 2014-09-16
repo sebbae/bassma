@@ -151,46 +151,50 @@ public:
 	IrrlichtRendererImpl(void* windowId, int width = 640, int height = 480);
 	~IrrlichtRendererImpl();
 
-	void createScene();
 	bool updateScene(int width, int height);
 	void run();
 	cv::Mat captureFrame();
 	Speed getSpeed();
 	void setSpeed(Speed speed);
-	void turn(Angle angle);
+	void turn(AngularVelocity velocity);
 private:
 	int width;
 	int height;
 	IrrObj<irr::IrrlichtDevice> device;
-	BulletObj<btDefaultCollisionConfiguration> collisionConfig;
-	BulletObj<btBroadphaseInterface> broadPhase;
-	BulletObj<btCollisionDispatcher> dispatcher;
-	BulletObj<btConstraintSolver> solver;
-	BulletObj<btDiscreteDynamicsWorld> world;
-	std::vector<btRigidBody*> objects;
-	BulletObj<btPairCachingGhostObject> ghostObject;
 	BulletObj<btKinematicCharacterController> character;
+	BulletObj<btPairCachingGhostObject> ghostObject;
+	BulletObj<btDiscreteDynamicsWorld> world;
+	BulletObj<btConstraintSolver> solver;
+	BulletObj<btCollisionDispatcher> dispatcher;
+	BulletObj<btBroadphaseInterface> broadPhase;
+	BulletObj<btDefaultCollisionConfiguration> collisionConfig;
+	std::vector<btRigidBody*> objects;
 	int lastFPS;
 	u32 then;
 	Speed speed;
 	Speed targetSpeed;
+	AngularVelocity turnVelocity;
 	Angle yawAngle;
 	Angle tiltAngle;
 	Angle rollAngle;
 
+	void createScene();
+	void destroyScene();
 	void resize(int width, int height);
 	void update(scene::ICameraSceneNode* camera, const Time frameDeltaTime);
 	btRigidBody* addBall(scene::ISceneManager* smgr, btVector3 position);
 	btRigidBody* addMap(scene::ISceneManager* smgr);
-	void move(const Time& frameDeltaTime, scene::ICameraSceneNode* camera);
-	void applyPhysics(const Time& frameDeltaTime);
+	void applyPhysics(const Time frameDeltaTime);
+	void calculateMotion(const Time frameDeltaTime);
+	void moveCharacter(scene::ICameraSceneNode* camera);
+	void updateCamera(scene::ICameraSceneNode* camera);
 };
 
 IrrlichtRendererImpl::IrrlichtRendererImpl(void* windowId, int width,
 		int height) :
 		width(width), height(height), lastFPS(-1), then(0), speed(0.0_ms), targetSpeed(
-				0.0_ms), yawAngle(0.0_deg), tiltAngle(0.0_deg), rollAngle(
-				0.0_deg) {
+				0.0_ms), turnVelocity(0.0_deg_s), yawAngle(0.0_deg), tiltAngle(
+				0.0_deg), rollAngle(0.0_deg) {
 
 	device = IrrObj<irr::IrrlichtDevice>(
 			windowId ?
@@ -201,6 +205,7 @@ IrrlichtRendererImpl::IrrlichtRendererImpl(void* windowId, int width,
 }
 
 IrrlichtRendererImpl::~IrrlichtRendererImpl() {
+	destroyScene();
 }
 
 Speed IrrlichtRendererImpl::getSpeed() {
@@ -211,47 +216,11 @@ void IrrlichtRendererImpl::setSpeed(Speed s) {
 	targetSpeed = s;
 }
 
-void IrrlichtRendererImpl::turn(Angle angle) {
+void IrrlichtRendererImpl::turn(AngularVelocity velocity) {
+	turnVelocity = velocity;
 }
 
-void IrrlichtRendererImpl::move(const Time& frameDeltaTime,
-		scene::ICameraSceneNode* camera) {
-	// always move first forward/backward w.r.t. to current view direction
-	core::vector3df moveAt =
-			(camera->getTarget() - camera->getPosition()).normalize();
-	Distance dist = speed * frameDeltaTime;
-	if (speed < targetSpeed) {
-		// account acceleration
-		speed += accelerate * frameDeltaTime;
-		if (speed > targetSpeed) {
-			speed = targetSpeed;
-		}
-		dist += 0.5 * speed * frameDeltaTime;
-	} else if (speed > targetSpeed) {
-		// account deceleration
-		speed -= accelerate * frameDeltaTime;
-		if (speed < targetSpeed) {
-			speed = targetSpeed;
-		}
-		dist += 0.5 * speed * frameDeltaTime;
-	}
-
-	core::vector3df camPosition = camera->getPosition();
-	core::vector3df camPositionNew(camPosition.X + moveAt.X * dist.val,
-			camPosition.Y + moveAt.Y * dist.val,
-			camPosition.Z + moveAt.Z * dist.val);
-	/*
-	 std::cout << "Move " << (camPositionNew - camPosition).getLength()
-	 << " from " << camPosition << " into direction "
-	 << moveAt << " to " << camPositionNew << " looking at "
-	 << (camPositionNew + yaw(yawAngle)) << std::endl;
-	 */
-	camera->setPosition(camPositionNew);
-	camera->setTarget(camPositionNew + yaw(yawAngle));
-	camera->setUpVector(roll(rollAngle));
-}
-
-void IrrlichtRendererImpl::applyPhysics(const Time& frameDeltaTime) {
+void IrrlichtRendererImpl::applyPhysics(const Time frameDeltaTime) {
 	//std::cout << "Delta time " << (frameDeltaTime.val) << std::endl;
 	world->stepSimulation(frameDeltaTime.val * 4, 60);
 	// Relay the object's orientation to irrlicht
@@ -275,13 +244,7 @@ void IrrlichtRendererImpl::applyPhysics(const Time& frameDeltaTime) {
 	}
 }
 
-void IrrlichtRendererImpl::update(scene::ICameraSceneNode* camera,
-		const Time frameDeltaTime) {
-	// always move first forward/backward w.r.t. to current view direction
-	//move(frameDeltaTime, camera);
-
-	core::vector3df moveAt =
-			(camera->getTarget() - camera->getPosition()).normalize();
+void IrrlichtRendererImpl::calculateMotion(const Time frameDeltaTime) {
 	if (speed < targetSpeed) {
 		// account acceleration
 		speed += accelerate * frameDeltaTime;
@@ -295,25 +258,24 @@ void IrrlichtRendererImpl::update(scene::ICameraSceneNode* camera,
 			speed = targetSpeed;
 		}
 	}
+	yawAngle = yawAngle + turnVelocity * frameDeltaTime;
+}
 
-	std::cout << "speed is " << speed.val << std::endl;
+void IrrlichtRendererImpl::moveCharacter(scene::ICameraSceneNode* camera) {
+	// always move first forward/backward w.r.t. to current view direction
+	core::vector3df direction = camera->getTarget() - camera->getPosition();
+	core::vector3df moveAt = direction.normalize();
 	btVector3 walkDirection = btVector3(moveAt.X, moveAt.Y, moveAt.Z)
 			* speed.val;
-	std::cout << walkDirection.getX() << " " << walkDirection.getY() << " "
-			<< walkDirection.getZ() << std::endl;
 	character->setWalkDirection(
 			btVector3(moveAt.X, moveAt.Y, moveAt.Z) * speed.val);
+}
 
-	//std::cout << "Delta time " << (frameDeltaTime.val) << std::endl;
-	applyPhysics(frameDeltaTime);
-
-	// update camera
+void IrrlichtRendererImpl::updateCamera(scene::ICameraSceneNode* camera) {
 	btVector3 pos = ghostObject->getWorldTransform().getOrigin();
-
 	core::vector3df camPosition = camera->getPosition();
 	core::vector3df camPositionNew = core::vector3df(pos.getX(), pos.getY(),
 			pos.getZ());
-
 	/*
 	 std::cout << "Move " << (camPositionNew - camPosition).getLength()
 	 << " from " << camPosition << " into direction "
@@ -323,6 +285,14 @@ void IrrlichtRendererImpl::update(scene::ICameraSceneNode* camera,
 	camera->setPosition(camPositionNew);
 	camera->setTarget(camPositionNew + yaw(yawAngle));
 	camera->setUpVector(roll(rollAngle));
+}
+
+void IrrlichtRendererImpl::update(scene::ICameraSceneNode* camera,
+		const Time frameDeltaTime) {
+	calculateMotion(frameDeltaTime);
+	moveCharacter(camera);
+	applyPhysics(frameDeltaTime);
+	updateCamera(camera);
 }
 
 cv::Mat IrrlichtRendererImpl::captureFrame() {
@@ -374,18 +344,17 @@ btRigidBody* IrrlichtRendererImpl::addBall(scene::ISceneManager* smgr,
 	transform.setIdentity();
 	transform.setOrigin(position);
 
-	btDefaultMotionState* motionState = new btDefaultMotionState(transform);
+	btDefaultMotionState* state = new btDefaultMotionState(transform);
 
 	// Create the shape
 	btCollisionShape* shape = new btSphereShape(radius);
 
 	// Add mass
-	btVector3 LocalInertia;
-	shape->calculateLocalInertia(mass, LocalInertia);
+	btVector3 intertia;
+	shape->calculateLocalInertia(mass, intertia);
 
 	// Create the rigid body object
-	btRigidBody* rigidBody = new btRigidBody(mass, motionState, shape,
-			LocalInertia);
+	btRigidBody* rigidBody = new btRigidBody(mass, state, shape, intertia);
 	rigidBody->setFriction(5.5f);
 	rigidBody->setRestitution(1.0f);
 
@@ -431,6 +400,7 @@ void IrrlichtRendererImpl::createScene() {
 	using namespace irr::scene;
 	using namespace irr::core;
 	ISceneManager* smgr = device->getSceneManager();
+	device->getCursorControl()->setVisible(false);
 
 	// Initialize bullet
 	collisionConfig = BulletObj<btDefaultCollisionConfiguration>(
@@ -488,25 +458,19 @@ void IrrlichtRendererImpl::createScene() {
 			btBroadphaseProxy::CharacterFilter,
 			btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 	world->addAction(character.get());
-	/*
-	 auto mapSelector = IrrObj<scene::ITriangleSelector>(
-	 smgr->createOctreeTriangleSelector(map->getMesh(), map, 128), drop);
-	 map->setTriangleSelector(mapSelector.get());
-	 auto ballSelector = IrrObj<scene::ITriangleSelector>(
-	 smgr->createOctreeTriangleSelector(ball->getMesh(), ball, 128), drop);
-	 ball->setTriangleSelector(ballSelector.get());
+}
 
-	 auto selector = IrrObj<IMetaTriangleSelector>(smgr->createMetaTriangleSelector(), drop);
-	 selector->addTriangleSelector(mapSelector.get());
-	 selector->addTriangleSelector(ballSelector.get());
-
-	 auto anim = IrrObj<scene::ISceneNodeAnimator>(
-	 smgr->createCollisionResponseAnimator(selector.get(), camera,
-	 core::vector3df(60, 50, 1.0012), core::vector3df(0, -10, 0),
-	 core::vector3df(0, 0, 0)), drop);
-	 camera->addAnimator(anim.get());
-	 */
-	device->getCursorControl()->setVisible(false);
+void IrrlichtRendererImpl::destroyScene() {
+	world->removeCollisionObject(ghostObject.get());
+	for (int i = world->getNumCollisionObjects() - 1; i >= 0; i--) {
+		btCollisionObject* obj = world->getCollisionObjectArray()[i];
+		btRigidBody* body = btRigidBody::upcast(obj);
+		if (body && body->getMotionState()) {
+			delete body->getMotionState();
+		}
+		world->removeCollisionObject(obj);
+		delete obj;
+	}
 }
 
 void IrrlichtRendererImpl::resize(int width, int height) {
@@ -585,8 +549,8 @@ void IrrlichtRenderer::setSpeed(Speed speed) {
 	impl->setSpeed(speed);
 }
 
-void IrrlichtRenderer::turn(Angle angle) {
-	impl->turn(angle);
+void IrrlichtRenderer::turn(AngularVelocity velocity) {
+	impl->turn(velocity);
 }
 
 } /* namespace bassma */

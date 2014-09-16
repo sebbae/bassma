@@ -63,6 +63,7 @@ int main(int argc, char* argv[]) {
 
 	std::unique_ptr<IrrlichtSimulator> sim(new IrrlichtSimulator());
 	sim->setSpeed(0.01_ms);
+	sim->turn(45.0_deg_s);
 
 	while (true) {
 		cv::Mat frame = sim->captureFrame();

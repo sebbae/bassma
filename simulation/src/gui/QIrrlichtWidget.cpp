@@ -78,15 +78,19 @@ Speed QIrrlichtWidget::getSpeed() {
 }
 
 void QIrrlichtWidget::setSpeed(Speed speed) {
-	simulator->setSpeed(speed);
+	simulator->setSpeed(Speed(speed.val * 0.1));
 }
 
-void QIrrlichtWidget::turn(Angle angle) {
-	simulator->turn(angle);
+void QIrrlichtWidget::turn(AngularVelocity velocity) {
+	simulator->turn(velocity);
+}
+
+void QIrrlichtWidget::turn(int velocity) {
+	turn(AngularVelocity(velocity));
 }
 
 void QIrrlichtWidget::setSpeed(int speed) {
-	setSpeed(Speed(speed));
+	setSpeed(Speed(speed * 0.1));
 }
 
 } /* namespace bassma */

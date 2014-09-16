@@ -7,6 +7,7 @@
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>
 #include <cstdlib>
+#include <iostream>
 
 using namespace irr;
 using namespace core;
@@ -137,7 +138,7 @@ int main() {
 // Runs the physics simulation.
 // - TDeltaTime tells the simulation how much time has passed since the last frame so the simulation can run independently of the frame rate.
 void UpdatePhysics(u32 TDeltaTime) {
-
+	std::cout << "Delta time " << (TDeltaTime * 0.001f) << std::endl;
 	World->stepSimulation(TDeltaTime * 0.001f, 60);
 
 	// Relay the object's orientation to irrlicht
@@ -191,7 +192,9 @@ void CreateBox(const btVector3 &TPosition, const vector3df &TScale, btScalar TMa
 
 // Create a sphere rigid body
 void CreateSphere(const btVector3 &TPosition, btScalar TRadius, btScalar TMass) {
-
+	std::cout << "create sphere with mass " << TMass << std::endl;
+	std::cout << "create sphere with radius " << TRadius << std::endl;
+	std::cout << "create sphere at position " << TPosition << std::endl;
 	ISceneNode *Node = irrScene->addSphereSceneNode(TRadius, 32);
 	Node->setMaterialFlag(EMF_LIGHTING, 1);
 	Node->setMaterialFlag(EMF_NORMALIZE_NORMALS, true);

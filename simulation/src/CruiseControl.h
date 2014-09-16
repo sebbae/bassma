@@ -22,7 +22,7 @@ public:
 
 	virtual Speed getSpeed() = 0;
 	virtual void setSpeed(Speed speed) = 0;
-	virtual void turn(Angle angle) = 0;
+	virtual void turn(AngularVelocity velocity) = 0;
 };
 
 } /* namespace bassma */

@@ -79,6 +79,19 @@
      </property>
     </widget>
    </item>
+   <item>
+    <widget class="QSlider" name="turnSlider">
+     <property name="minimum">
+      <number>-180</number>
+     </property>
+     <property name="maximum">
+      <number>180</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -89,6 +102,7 @@
    <container>1</container>
    <slots>
     <slot>setSpeed(int)</slot>
+    <slot>turn(int)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -107,6 +121,22 @@
     <hint type="destinationlabel">
      <x>169</x>
      <y>115</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>turnSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>video</receiver>
+   <slot>turn(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>159</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>163</x>
+     <y>123</y>
     </hint>
    </hints>
   </connection>

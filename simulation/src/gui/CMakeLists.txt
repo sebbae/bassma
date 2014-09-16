@@ -33,7 +33,7 @@ set(SIMULATORGUI_SRCS
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_lib(simulatorgui.lib "${SIMULATORGUI_SRCS}")
-add_exe(simulatorgui simulatorgui.cpp simulatorgui.lib simulator.lib ${IRRLICHT_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+add_exe(simulatorgui simulatorgui.cpp simulatorgui.lib simulator.lib ${IRRLICHT_LIBRARIES} ${BULLET_LIBRARIES} ${QT_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 
 if(build_tests)
 	include(test/CMakeLists.txt)

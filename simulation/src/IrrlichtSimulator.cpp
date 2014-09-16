@@ -28,7 +28,7 @@ public:
 
 	virtual Speed getSpeed();
 	virtual void setSpeed(Speed speed);
-	virtual void turn(Angle angle);
+	virtual void turn(AngularVelocity velocity);
 private:
 	std::thread thread;
 	std::shared_ptr<IrrlichtRenderer> renderer;
@@ -121,8 +121,8 @@ void IrrlichtSimulatorImpl::setSpeed(Speed speed) {
 	renderer->setSpeed(speed);
 }
 
-void IrrlichtSimulatorImpl::turn(Angle angle) {
-	renderer->turn(angle);
+void IrrlichtSimulatorImpl::turn(AngularVelocity velocity) {
+	renderer->turn(velocity);
 }
 
 IrrlichtSimulator::IrrlichtSimulator(void* windowId, int width, int height) {
@@ -148,8 +148,8 @@ void IrrlichtSimulator::setSpeed(Speed speed) {
 	impl->setSpeed(speed);
 }
 
-void IrrlichtSimulator::turn(Angle angle) {
-	impl->turn(angle);
+void IrrlichtSimulator::turn(AngularVelocity velocity) {
+	impl->turn(velocity);
 }
 
 } /* namespace bassma */
