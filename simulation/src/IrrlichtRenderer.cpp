@@ -10,8 +10,11 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 #include <irrlicht.h>
+#include <btBulletCollisionCommon.h>
+#include <btBulletDynamicsCommon.h>
 #include <iostream>
 #include <thread>
+#include <vector>
 #include <cmath>
 #include <GL/gl.h>
 #include <X11/Xlib.h>
@@ -88,11 +91,56 @@ irr::IrrlichtDevice* createGuestDevice(void* windowId, int width, int height) {
 	return createDeviceEx(params);
 }
 
+btTriangleMesh* convertIrrMeshToBtMesh(const irr::scene::IMesh* irrMesh,
+		const irr::core::vector3df& scaling) {
+	btVector3 vertices[3];
+	btTriangleMesh* btMesh = new btTriangleMesh();
+	for (int i = 0; i < irrMesh->getMeshBufferCount(); i++) {
+		irr::scene::IMeshBuffer* mb = irrMesh->getMeshBuffer(i);
+		if (mb->getVertexType() == irr::video::EVT_STANDARD) {
+			irr::video::S3DVertex* mb_vertices =
+					static_cast<irr::video::S3DVertex*>(mb->getVertices());
+			u16* mb_indices = mb->getIndices();
+			u32 numIndices = mb->getIndexCount();
+			for (int j = 0; j < numIndices; j += 3) {
+				for (int k = 0; k < 3; k++) {
+					u32 index = mb_indices[j + k];
+					vertices[k] = btVector3(
+							mb_vertices[index].Pos.X * scaling.X,
+							mb_vertices[index].Pos.Y * scaling.Y,
+							mb_vertices[index].Pos.Z * scaling.Z);
+				}
+				btMesh->addTriangle(vertices[0], vertices[1], vertices[2]);
+			}
+		} else if (mb->getVertexType() == irr::video::EVT_2TCOORDS) {
+			irr::video::S3DVertex2TCoords* mb_vertices =
+					static_cast<irr::video::S3DVertex2TCoords*>(mb->getVertices());
+			u16* mb_indices = mb->getIndices();
+			u32 numIndices = mb->getIndexCount();
+			for (int j = 0; j < numIndices; j += 3) {
+				for (int k = 0; k < 3; k++) {
+					u32 index = mb_indices[j + k];
+					vertices[k] = btVector3(
+							mb_vertices[index].Pos.X * scaling.X,
+							mb_vertices[index].Pos.Y * scaling.Y,
+							mb_vertices[index].Pos.Z * scaling.Z);
+				}
+				btMesh->addTriangle(vertices[0], vertices[1], vertices[2]);
+			}
+		}
+	}
+	return btMesh;
+}
+
 void drop(IReferenceCounted* obj) {
 	obj->drop();
 }
+
 template<typename T>
 using IrrObj = std::unique_ptr<T, std::function<void(IReferenceCounted*)> >;
+
+template<typename T>
+using BulletObj = std::unique_ptr<T>;
 
 }
 
@@ -112,6 +160,12 @@ private:
 	int width;
 	int height;
 	IrrObj<irr::IrrlichtDevice> device;
+	BulletObj<btDefaultCollisionConfiguration> collisionConfig;
+	BulletObj<btBroadphaseInterface> broadPhase;
+	BulletObj<btCollisionDispatcher> dispatcher;
+	BulletObj<btConstraintSolver> solver;
+	BulletObj<btDiscreteDynamicsWorld> world;
+	std::vector<btRigidBody*> objects;
 	int lastFPS;
 	u32 then;
 	Speed speed;
@@ -122,8 +176,8 @@ private:
 
 	void resize(int width, int height);
 	void update(scene::ICameraSceneNode* camera, const Time frameDeltaTime);
-	scene::IMeshSceneNode* addBall(scene::ISceneManager* smgr);
-	scene::IMeshSceneNode* addMap(scene::ISceneManager* smgr);
+	btRigidBody* addBall(scene::ISceneManager* smgr, btVector3 position);
+	btRigidBody* addMap(scene::ISceneManager* smgr);
 };
 
 IrrlichtRendererImpl::IrrlichtRendererImpl(void* windowId, int width,
@@ -181,29 +235,6 @@ void IrrlichtRendererImpl::update(scene::ICameraSceneNode* camera,
 	core::vector3df camPositionNew(camPosition.X + moveAt.X * dist.val,
 			camPosition.Y + moveAt.Y * dist.val,
 			camPosition.Z + moveAt.Z * dist.val);
-
-    core::line3d<f32> ray;
-    ray.start = camera->getPosition();
-    ray.end = ray.start + (camera->getTarget() - ray.start).normalize() * 1000.0f;
-    core::vector3df intersection;
-    core::triangle3df hitTriangle;
-    scene::ISceneCollisionManager* collMan = device->getSceneManager()->getSceneCollisionManager();
-    scene::ISceneNode * selectedSceneNode =
-        collMan->getSceneNodeAndCollisionPointFromRay(
-                ray,
-                intersection, // This will be the position of the collision
-                hitTriangle, // This will be the triangle hit in the collision
-                0, // This ensures that only nodes that we have
-                        // set up to be pickable are considered
-                0); // Check the entire scene (this is actually the implicit default)
-
-    // If the ray hit anything, move the billboard to the collision position
-    // and draw the triangle that was hit.
-    if(selectedSceneNode)
-    {
-
-    }
-
 	/*
 	 std::cout << "Move " << (camPositionNew - camPosition).getLength()
 	 << " from " << camPosition << " into direction "
@@ -213,6 +244,31 @@ void IrrlichtRendererImpl::update(scene::ICameraSceneNode* camera,
 	camera->setPosition(camPositionNew);
 	camera->setTarget(camPositionNew + yaw(yawAngle));
 	camera->setUpVector(roll(rollAngle));
+
+	//std::cout << "Delta time " << (frameDeltaTime.val) << std::endl;
+	world->stepSimulation(frameDeltaTime.val * 4, 60);
+
+	// Relay the object's orientation to irrlicht
+	for (btRigidBody* body : objects) {
+		irr::scene::ISceneNode* node =
+				static_cast<irr::scene::ISceneNode*>(body->getUserPointer());
+
+		// Set position
+		btVector3 point = body->getCenterOfMassPosition();
+		core::vector3df newPos((f32) point[0], (f32) point[1], (f32) point[2]);
+		//std::cout << "Update object to " << newPos << std::endl;
+		node->setPosition(newPos);
+
+		// Set rotation
+		core::vector3df Euler;
+		const btQuaternion& TQuat = body->getOrientation();
+		irr::core::quaternion q(TQuat.getX(), TQuat.getY(), TQuat.getZ(),
+				TQuat.getW());
+		q.toEuler(Euler);
+		Euler *= irr::core::RADTODEG;
+		node->setRotation(Euler);
+	}
+
 }
 
 cv::Mat IrrlichtRendererImpl::captureFrame() {
@@ -246,18 +302,46 @@ cv::Mat IrrlichtRendererImpl::captureFrame() {
 	}
 }
 
-scene::IMeshSceneNode* IrrlichtRendererImpl::addBall(scene::ISceneManager* smgr) {
+btRigidBody* IrrlichtRendererImpl::addBall(scene::ISceneManager* smgr,
+		btVector3 position) {
+	btScalar radius = 2.0;
+	btScalar mass = 1;
+
 	const io::path workingDir = device->getFileSystem()->getWorkingDirectory();
-	scene::IMeshSceneNode* ball = smgr->addSphereSceneNode(2.0);
+	scene::IMeshSceneNode* ball = smgr->addSphereSceneNode(radius, 32);
 	ball->setPosition(core::vector3df(10, 0, 0));
 	ball->setMaterialTexture(0,
 			device->getVideoDriver()->getTexture(
 					workingDir + "/media/tennisball.jpg"));
 	ball->setMaterialFlag(video::EMF_LIGHTING, false);
-	return ball;
+
+	// Set the initial position of the object
+	btTransform transform;
+	transform.setIdentity();
+	transform.setOrigin(position);
+
+	btDefaultMotionState* motionState = new btDefaultMotionState(transform);
+
+	// Create the shape
+	btCollisionShape* shape = new btSphereShape(radius);
+
+	// Add mass
+	btVector3 LocalInertia;
+	shape->calculateLocalInertia(mass, LocalInertia);
+
+	// Create the rigid body object
+	btRigidBody* rigidBody = new btRigidBody(mass, motionState, shape,
+			LocalInertia);
+	rigidBody->setFriction(5.5f);
+	rigidBody->setRestitution(1.0f);
+
+	// Store a pointer to the irrlicht node so we can update it later
+	rigidBody->setUserPointer(ball);
+
+	return rigidBody;
 }
 
-scene::IMeshSceneNode* IrrlichtRendererImpl::addMap(scene::ISceneManager* smgr) {
+btRigidBody* IrrlichtRendererImpl::addMap(scene::ISceneManager* smgr) {
 	const io::path workingDir = device->getFileSystem()->getWorkingDirectory();
 	device->getFileSystem()->addFileArchive(workingDir + "/media/court.pk3");
 	scene::IAnimatedMesh* mesh = smgr->getMesh("court.bsp");
@@ -265,7 +349,27 @@ scene::IMeshSceneNode* IrrlichtRendererImpl::addMap(scene::ISceneManager* smgr) 
 		throw "Unable to load map.";
 	}
 	scene::IMeshSceneNode* map = smgr->addOctreeSceneNode(mesh->getMesh(0));
-	return map;
+
+	btTriangleMesh* indexVertexArrays = convertIrrMeshToBtMesh(map->getMesh(),
+			map->getScale());
+	btBvhTriangleMeshShape* trimeshShape = new btBvhTriangleMeshShape(
+			indexVertexArrays, true);
+
+	btQuaternion quat;
+	quat.setEulerZYX(0, 0, 0);
+	btTransform Transform2;
+	Transform2.setIdentity();
+	Transform2.setOrigin(btVector3(0, 0, 0));
+	Transform2.setRotation(quat);
+
+	btDefaultMotionState* motionState = new btDefaultMotionState(Transform2);
+	btRigidBody* rigidBody = new btRigidBody(0, motionState, trimeshShape);
+	rigidBody->setUserPointer(map);
+
+	rigidBody->setRestitution(0.8f);
+	rigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
+
+	return rigidBody;
 }
 
 void IrrlichtRendererImpl::createScene() {
@@ -274,28 +378,52 @@ void IrrlichtRendererImpl::createScene() {
 	using namespace irr::core;
 	ISceneManager* smgr = device->getSceneManager();
 	ICameraSceneNode* camera = smgr->addCameraSceneNode(nullptr,
-			vector3df(-10, 0, 0), vector3df(0, 0, 0), 0, true);
+			vector3df(-80, -32, 0), vector3df(0, 0, 0), 0, true);
+
+	// Initialize bullet
+	collisionConfig = BulletObj<btDefaultCollisionConfiguration>(
+			new btDefaultCollisionConfiguration());
+	broadPhase = BulletObj<btBroadphaseInterface>(
+			new btAxisSweep3(btVector3(-1000, -1000, -1000),
+					btVector3(1000, 1000, 1000)));
+	dispatcher = BulletObj<btCollisionDispatcher>(
+			new btCollisionDispatcher(collisionConfig.get()));
+	solver = BulletObj<btConstraintSolver>(
+			new btSequentialImpulseConstraintSolver());
+	world = BulletObj<btDiscreteDynamicsWorld>(
+			new btDiscreteDynamicsWorld(dispatcher.get(), broadPhase.get(),
+					solver.get(), collisionConfig.get()));
+
+	world->setGravity(btVector3(0, -9.8, 0));
 
 	auto map = addMap(smgr);
-	auto ball = addBall(smgr);
+	world->addRigidBody(map);
 
-	auto mapSelector = IrrObj<scene::ITriangleSelector>(
-			smgr->createOctreeTriangleSelector(map->getMesh(), map, 128), drop);
-	map->setTriangleSelector(mapSelector.get());
-	auto ballSelector = IrrObj<scene::ITriangleSelector>(
-			smgr->createOctreeTriangleSelector(ball->getMesh(), ball, 128), drop);
-	ball->setTriangleSelector(ballSelector.get());
+	auto ball = addBall(smgr, btVector3(10, 0, 0));
+	world->addRigidBody(ball);
+	objects.push_back(ball);
 
-	auto selector = IrrObj<IMetaTriangleSelector>(smgr->createMetaTriangleSelector(), drop);
-	selector->addTriangleSelector(mapSelector.get());
-	selector->addTriangleSelector(ballSelector.get());
+	auto ball2 = addBall(smgr, btVector3(7, 5, 5));
+	world->addRigidBody(ball2);
+	objects.push_back(ball2);
 
 	/*
-	auto anim = IrrObj<scene::ISceneNodeAnimator>(
-			smgr->createCollisionResponseAnimator(selector.get(), camera,
-					core::vector3df(60, 50, 1.0012), core::vector3df(0, -10, 0),
-					core::vector3df(0, 0, 0)), drop);
-	camera->addAnimator(anim.get());
+	 auto mapSelector = IrrObj<scene::ITriangleSelector>(
+	 smgr->createOctreeTriangleSelector(map->getMesh(), map, 128), drop);
+	 map->setTriangleSelector(mapSelector.get());
+	 auto ballSelector = IrrObj<scene::ITriangleSelector>(
+	 smgr->createOctreeTriangleSelector(ball->getMesh(), ball, 128), drop);
+	 ball->setTriangleSelector(ballSelector.get());
+
+	 auto selector = IrrObj<IMetaTriangleSelector>(smgr->createMetaTriangleSelector(), drop);
+	 selector->addTriangleSelector(mapSelector.get());
+	 selector->addTriangleSelector(ballSelector.get());
+
+	 auto anim = IrrObj<scene::ISceneNodeAnimator>(
+	 smgr->createCollisionResponseAnimator(selector.get(), camera,
+	 core::vector3df(60, 50, 1.0012), core::vector3df(0, -10, 0),
+	 core::vector3df(0, 0, 0)), drop);
+	 camera->addAnimator(anim.get());
 	 */
 	device->getCursorControl()->setVisible(false);
 }

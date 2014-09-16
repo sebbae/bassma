@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 	using namespace bassma;
 
 	std::unique_ptr<IrrlichtSimulator> sim(new IrrlichtSimulator());
-	sim->setSpeed(30.0_ms);
+	//sim->setSpeed(30.0_ms);
 
 	while (true) {
 		cv::Mat frame = sim->captureFrame();
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 		cv::namedWindow("Display Image", CV_WINDOW_AUTOSIZE);
 		cv::imshow("Display Image", out);
 		cv::waitKey(50);
-		std::chrono::milliseconds duration(500);
+		std::chrono::milliseconds duration(50);
 		std::this_thread::sleep_for(duration);
 	}
 
