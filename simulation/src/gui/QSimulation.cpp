@@ -17,6 +17,9 @@ namespace bassma {
 QSimulation::QSimulation(QWidget *parent) :
 		QWidget(parent), ui(new bassma::Ui::QSimulation) {
 	ui->setupUi(this);
+    ui->video->installEventFilter(this);
+    ui->speedSlider->installEventFilter(this);
+    ui->turnSlider->installEventFilter(this);
 }
 
 QSimulation::~QSimulation() {
@@ -27,6 +30,25 @@ void QSimulation::resizeEvent(QResizeEvent* event) {
 	QWidget::resizeEvent(event);
 }
 
+
+bool QSimulation::eventFilter(QObject* object, QEvent* event) {
+	if (event->type() != QEvent::KeyPress) {
+		return false;
+	}
+	QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
+	if (keyEvent->key() == Qt::Key_Left) {
+		ui->turnSlider->setValue(ui->turnSlider->value() - 1);
+	} else if (keyEvent->key() == Qt::Key_Right) {
+		ui->turnSlider->setValue(ui->turnSlider->value() + 1);
+	} else if (keyEvent->key() == Qt::Key_Up) {
+		ui->speedSlider->setValue(ui->speedSlider->value() + 1);
+	} else if (keyEvent->key() == Qt::Key_Down) {
+		ui->speedSlider->setValue(ui->speedSlider->value() -1);
+	} else {
+		return false;
+	}
+	return true;
+}
 
 void QSimulation::resize(int width, int height) {
 	ui->video->resize(width, height);

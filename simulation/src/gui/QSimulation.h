@@ -33,6 +33,7 @@ public:
 
 protected:
 	virtual void resizeEvent(QResizeEvent* event);
+	virtual bool eventFilter(QObject* object, QEvent* event);
 
 private slots:
 	void setSpeed(int speed);
