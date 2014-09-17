@@ -52,6 +52,8 @@ void QSimulator::timerEvent(QTimerEvent* event) {
 	cv::Mat image = videoSource->captureFrame();
 	// Show the image
 	if (!image.empty()) {
+		cv::Mat detectFrame;
+		ui->detector->detect(image, detectFrame);
 		ui->processed->showImage(image);
 	}
 	event->accept();

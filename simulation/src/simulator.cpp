@@ -7,6 +7,7 @@
 
 #include "VideoSource.h"
 #include "IrrlichtSimulator.h"
+#include "BallDetector.h"
 
 #include <opencv2/opencv.hpp>
 #include <memory>
@@ -28,11 +29,11 @@ cv::Mat detectCircles(cv::Mat& frame) {
 	cv::cvtColor(frame, bw, CV_BGR2GRAY);
 
 	/// Reduce the noise so we avoid false circle detection
-	cv::GaussianBlur( bw, bw, cv::Size(9, 9), 2, 2 );
+	cv::GaussianBlur( bw, bw, cv::Size(3, 3), 2, 2 );
 
 	/// Apply the Hough Transform to find the circles
 	std::vector<cv::Vec3f> circles;
-	cv::HoughCircles(bw, circles, CV_HOUGH_GRADIENT, 1, bw.rows / 8, 500, 400, 0, 0);
+	cv::HoughCircles(bw, circles, CV_HOUGH_GRADIENT, 1.6, 30, 210, 110, 10, 0);
 	std::cout << "Circles found: " << circles.size() << std::endl;
 
 	/// Draw the circles detected
@@ -40,9 +41,9 @@ cv::Mat detectCircles(cv::Mat& frame) {
 		cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
 		int radius = cvRound(circles[i][2]);
 		cv::circle(frame, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
-		cv::circle(frame, center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
+		cv::circle(frame, center, radius, cv::Scalar(0, 0, 255), 2, 8, 0);
 	}
-	return bw;
+	return frame;
 }
 
 cv::Mat detectColor(cv::Mat frame) {
@@ -62,16 +63,18 @@ int main(int argc, char* argv[]) {
 	using namespace bassma;
 
 	std::unique_ptr<IrrlichtSimulator> sim(new IrrlichtSimulator());
+	std::unique_ptr<Detector> detector(new BallDetector());
 	sim->setSpeed(0.01_ms);
-	sim->turn(45.0_deg_s);
 
 	while (true) {
 		cv::Mat frame = sim->captureFrame();
 		cv::Mat out = frame;
+		cv::Mat detectFrame;
 
 		//out = detectColor(frame);
 		//out = canny(frame);
 	    //out = detectCircles(frame);
+		detector->detect(out, detectFrame, true);
 
 		cv::namedWindow("Display Image", CV_WINDOW_AUTOSIZE);
 		cv::imshow("Display Image", out);

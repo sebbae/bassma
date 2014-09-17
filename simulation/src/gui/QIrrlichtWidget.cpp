@@ -62,11 +62,17 @@ void QIrrlichtWidget::resizeEvent(QResizeEvent* event) {
 
 void QIrrlichtWidget::update() {
 	QSize size = this->size();
-	simulator->resize(size.width(), size.height());
+	resize(size.width(), size.height());
 }
 
 void QIrrlichtWidget::resize(int width, int height) {
-	simulator->resize(width, height);
+	double heightForWidth = round((double) (width) * 3.0 / 4.0);
+	double widthForHeight = round((double) (height) * 4.0 / 3.0);
+	if (heightForWidth <= height) {
+		simulator->resize(width, heightForWidth);
+	} else {
+		simulator->resize(widthForHeight, height);
+	}
 }
 
 cv::Mat QIrrlichtWidget::captureFrame() {

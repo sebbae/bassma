@@ -3,11 +3,13 @@ set(SIMULATORGUI_MOC_HDRS
 	QOpenCVWidget.h
 	QOpenCVWebcamWidget.h
 	QSimulation.h
+	QBallDetector.h
 	QSimulator.h
 )
 
 set(SIMULATORGUI_UIS
 	QSimulation.ui
+	QBallDetector.ui
 	QSimulator.ui
 )
 
@@ -23,6 +25,7 @@ set(SIMULATORGUI_SRCS
 	QOpenCVWidget.cpp
 	QOpenCVWebcamWidget.cpp
 	QSimulation.cpp
+	QBallDetector.cpp
 	QSimulator.cpp
 	${SIMULATORGUI_MOC_SRCS}
 	${SIMULATORGUI_RC_SRCS}

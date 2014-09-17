@@ -1,10 +1,11 @@
 ADD_SUBDIRECTORY(examples)
-#ADD_SUBDIRECTORY(gui)
+ADD_SUBDIRECTORY(gui)
 
 set(SIMULATOR_SRCS
 	IrrlichtSimulator.cpp
 	IrrlichtRenderer.cpp
 	OpenCVWebcam.cpp
+	BallDetector.cpp
 )
 add_lib(simulator.lib "${SIMULATOR_SRCS}")
 add_exe(simulator simulator.cpp simulator.lib ${IRRLICHT_LIBRARIES} ${BULLET_LIBRARIES} ${OpenCV_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})

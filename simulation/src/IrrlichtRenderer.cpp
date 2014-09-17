@@ -429,7 +429,7 @@ void IrrlichtRendererImpl::createScene() {
 	world->addRigidBody(ball2);
 	objects.push_back(ball2);
 
-	irr::core::vector3df cameraPos = vector3df(-80, -32, 0);
+	irr::core::vector3df cameraPos = vector3df(-30, -32, 0);
 	ICameraSceneNode* camera = smgr->addCameraSceneNode(nullptr, cameraPos,
 			vector3df(0, 0, 0), 0, true);
 
@@ -480,6 +480,10 @@ void IrrlichtRendererImpl::resize(int width, int height) {
 	scene::ICameraSceneNode* camera =
 			device->getSceneManager()->getActiveCamera();
 	if (camera) {
+		const irr::core::rect<signed int> viewPort =
+				device->getVideoDriver()->getViewPort();
+		std::cout << "viewport (" << viewPort.LowerRightCorner.X << "," << viewPort.LowerRightCorner.Y << ") (" << viewPort.UpperLeftCorner.X << "," << viewPort.UpperLeftCorner.Y << std::endl;
+		device->getVideoDriver()->setViewPort(core::rect<s32>(0,0,width, height));
 		camera->setAspectRatio((f32) size.Width / (f32) size.Height);
 	}
 	this->width = width;
