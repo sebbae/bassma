@@ -73,14 +73,14 @@ irr::IrrlichtDevice* createGuestDevice(void* windowId, int width, int height) {
 //	params.AntiAlias = 0;
 //	params.Bits = 32;
 //	params.DeviceType = EIDT_X11;
-//	params.Doublebuffer = true;
+	params.Doublebuffer = true;
 //	params.DriverType = video::EDT_OPENGL;
 //	params.EventReceiver = 0;
 //	params.Fullscreen = false;
 //	params.HighPrecisionFPU = false;
 //	params.IgnoreInput = false;
 //	params.LoggingLevel = ELL_INFORMATION;
-//	params.Stencilbuffer = true;
+	params.Stencilbuffer = true;
 //	params.Stereobuffer = false;
 //	params.Vsync = false;
 	// Specify which window/widget to render to
@@ -476,7 +476,6 @@ void IrrlichtRendererImpl::destroyScene() {
 void IrrlichtRendererImpl::resize(int width, int height) {
 	using namespace irr;
 	core::dimension2d<u32> size(width, height);
-	device->getVideoDriver()->OnResize(size);
 	scene::ICameraSceneNode* camera =
 			device->getSceneManager()->getActiveCamera();
 	if (camera) {
@@ -484,8 +483,9 @@ void IrrlichtRendererImpl::resize(int width, int height) {
 				device->getVideoDriver()->getViewPort();
 		std::cout << "viewport (" << viewPort.LowerRightCorner.X << "," << viewPort.LowerRightCorner.Y << ") (" << viewPort.UpperLeftCorner.X << "," << viewPort.UpperLeftCorner.Y << std::endl;
 		device->getVideoDriver()->setViewPort(core::rect<s32>(0,0,width, height));
-		camera->setAspectRatio((f32) size.Width / (f32) size.Height);
+		//camera->setAspectRatio((f32) size.Width / (f32) size.Height);
 	}
+	device->getVideoDriver()->OnResize(size);
 	this->width = width;
 	this->height = height;
 }
@@ -507,10 +507,10 @@ bool IrrlichtRendererImpl::updateScene(int width, int height) {
 
 		update(camera, Time(frameDeltaTime));
 
-		driver->beginScene(true, true, video::SColor(255, 200, 200, 200));
 		if ((width != this->width) || (height != this->height)) {
 			resize(width, height);
 		}
+		driver->beginScene(true, true, video::SColor(0, 200, 200, 200));
 		smgr->drawAll();
 		driver->endScene();
 

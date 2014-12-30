@@ -26,25 +26,25 @@ QSimulator::~QSimulator() {
 
 void QSimulator::on_actionVideoWebcam_triggered() {
 	std::cout << "on_actionVideoWebcam_triggered" << std::endl;
-	ui->videoLayout->removeWidget(ui->source);
+	ui->sourceDoc->removeWidget(ui->source);
 	ui->source->close();
 	delete videoSource;
 	videoSource = new QOpenCVWebcamWidget(ui->centralWidget);
 	ui->source = dynamic_cast<QWidget*>(videoSource);
-	ui->videoLayout->addWidget(ui->source, 0,0,1,1);
-	ui->videoLayout->update();
+	ui->sourceDoc->addWidget(ui->source, 0,0,1,1);
+	ui->sourceDoc->update();
 	startTimer(10);
 }
 
 void QSimulator::on_actionVideoIrrlicht_triggered() {
 	std::cout << "on_actionVideoIrrlicht_triggered" << std::endl;
-	ui->videoLayout->removeWidget(ui->source);
+	ui->sourceDocWidget->removeWidget(ui->source);
 	ui->source->close();
 	delete videoSource;
 	videoSource = new QSimulation(ui->centralWidget);
 	ui->source = dynamic_cast<QWidget*>(videoSource);
-	ui->videoLayout->addWidget(ui->source, 0,0,1,1);
-	ui->videoLayout->update();
+	ui->sourceDocWidget->addWidget(ui->source, 0,0,1,1);
+	ui->sourceDoc->update();
 	startTimer(100);
 }
 

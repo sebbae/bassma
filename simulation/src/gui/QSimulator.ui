@@ -16,61 +16,21 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <layout class="QGridLayout" name="videoLayout">
-      <item row="0" column="1">
-       <widget class="bassma::QOpenCVWidget" name="processed" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>320</width>
-          <height>240</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>640</width>
-          <height>480</height>
-         </size>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_4"/>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QWidget" name="empty" native="true"/>
-      </item>
-      <item row="0" column="0">
-       <widget class="QWidget" name="source" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>320</width>
-          <height>240</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>640</width>
-          <height>480</height>
-         </size>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3"/>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="bassma::QBallDetector" name="detector" native="true">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>320</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>640</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="bassma::QOpenCVWidget" name="processed" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>320</width>
+        <height>240</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>640</width>
+        <height>480</height>
+       </size>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_4"/>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -101,6 +61,57 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="sourceDoc">
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="sourceDocContent">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QWidget" name="source" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>320</width>
+         <height>240</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>640</width>
+         <height>480</height>
+        </size>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3"/>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="detectorDock">
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="detectorDocContent">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="bassma::QBallDetector" name="detector" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>320</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>640</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionVideoWebcam">
    <property name="text">
     <string>Webcam</string>
